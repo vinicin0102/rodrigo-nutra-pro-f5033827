@@ -63,19 +63,32 @@ const Community = () => {
 
   const fetchMessages = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: messagesData, error: messagesError } = await supabase
         .from('community_messages')
-        .select(`
-          *,
-          profiles (
-            username,
-            avatar_url
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: true });
 
-      if (error) throw error;
-      setMessages(data || []);
+      if (messagesError) throw messagesError;
+
+      // Fetch profiles for all unique user IDs
+      const userIds = [...new Set(messagesData?.map(m => m.user_id) || [])];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, username, avatar_url')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Create a map of user_id to profile
+      const profileMap = new Map(profilesData?.map(p => [p.id, p]));
+
+      // Merge messages with profiles
+      const messagesWithProfiles = messagesData?.map(msg => ({
+        ...msg,
+        profiles: profileMap.get(msg.user_id) || undefined
+      })) || [];
+
+      setMessages(messagesWithProfiles);
     } catch (error) {
       console.error('Error fetching messages:', error);
       toast({
