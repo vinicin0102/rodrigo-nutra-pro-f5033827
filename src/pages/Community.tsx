@@ -317,7 +317,7 @@ const Community = () => {
                             )}
                             {message.audio_url && (
                               <Button
-                                variant="ghost"
+                                variant="secondary"
                                 size="sm"
                                 onClick={() => handlePlayAudio(message.audio_url!)}
                                 className="mt-2"
