@@ -87,10 +87,10 @@ const Community = () => {
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
-            Comunidade Elite
+            Comunidade Aberta
           </h1>
           <p className="text-muted-foreground">
-            Compartilhe seus resultados e inspire outros vendedores
+            Conecte-se, faça networking e troque experiências
           </p>
         </div>
 

@@ -1,44 +1,87 @@
-import { Home, Users, Trophy, Gift, Sparkles, Lightbulb, MessageCircle } from "lucide-react";
+import { Home, Users, Trophy, Gift, Sparkles, MessageCircle, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "./ui/button";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
-const navItems = [
-  { icon: Home, label: "Início", path: "/" },
-  { icon: Users, label: "Comunidade", path: "/community" },
-  { icon: Trophy, label: "Ranking", path: "/ranking" },
-  { icon: Gift, label: "Prêmios", path: "/rewards" },
-  { icon: Sparkles, label: "IA Copy", path: "/ai-copy" },
-  { icon: Lightbulb, label: "IA Criativo", path: "/ai-creative" },
-  { icon: MessageCircle, label: "Suporte", path: "/support" },
-];
+interface NavItemProps {
+  to: string;
+  icon: LucideIcon;
+  children: React.ReactNode;
+  mobile?: boolean;
+}
 
-export const Navigation = () => {
+const NavItem = ({ to, icon: Icon, children, mobile }: NavItemProps) => {
   const location = useLocation();
+  const isActive = location.pathname === to;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50 md:top-0 md:bottom-auto md:border-b md:border-t-0">
-      <div className="flex justify-around md:justify-center md:gap-8 md:py-4 py-2 px-2 max-w-7xl mx-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex flex-col md:flex-row items-center gap-1 md:gap-2 px-2 md:px-4 py-2 rounded-lg transition-all duration-300",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
-              )}
-            >
-              <Icon className={cn("w-5 h-5 md:w-6 md:h-6", isActive && "drop-shadow-[0_0_8px_hsl(var(--primary))]")} />
-              <span className="text-xs md:text-sm font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+    <Link
+      to={to}
+      className={cn(
+        "flex items-center gap-2 px-3 py-2 rounded-lg transition-all",
+        mobile ? "flex-col text-xs" : "text-sm",
+        isActive
+          ? "text-primary bg-primary/10"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted"
+      )}
+    >
+      <Icon className={cn("w-5 h-5", isActive && "drop-shadow-[0_0_8px_hsl(var(--primary))]")} />
+      <span className={mobile ? "text-xs" : ""}>{children}</span>
+    </Link>
+  );
+};
+
+export const Navigation = () => {
+  const { signOut, isDiamond } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Logout realizado com sucesso!");
+  };
+
+  return (
+    <>
+      {/* Desktop Navigation */}
+      <nav className="hidden md:block fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border z-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-8">
+              <h2 className="text-xl font-bold text-gradient-fire">NutraHub Elite</h2>
+              <div className="flex gap-1">
+                <NavItem to="/" icon={Home}>Início</NavItem>
+                <NavItem to="/community" icon={Users}>Comunidade</NavItem>
+                <NavItem to="/ranking" icon={Trophy}>Ranking</NavItem>
+                <NavItem to="/rewards" icon={Gift}>Prêmios</NavItem>
+                {isDiamond && (
+                  <>
+                    <NavItem to="/ai-copy" icon={Sparkles}>IA Copy</NavItem>
+                    <NavItem to="/ai-creative" icon={Sparkles}>IA Criativo</NavItem>
+                  </>
+                )}
+                <NavItem to="/support" icon={MessageCircle}>Suporte</NavItem>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
+        <div className="grid grid-cols-5 gap-1 p-2">
+          <NavItem to="/" icon={Home} mobile>Início</NavItem>
+          <NavItem to="/community" icon={Users} mobile>Comunidade</NavItem>
+          <NavItem to="/ranking" icon={Trophy} mobile>Ranking</NavItem>
+          <NavItem to="/rewards" icon={Gift} mobile>Prêmios</NavItem>
+          <NavItem to="/support" icon={MessageCircle} mobile>Suporte</NavItem>
+        </div>
+      </nav>
+    </>
   );
 };
