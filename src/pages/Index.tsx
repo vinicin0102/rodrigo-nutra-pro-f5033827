@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Flame, Heart, MessageCircle, Share2, Image as ImageIcon } from "lucide-react";
+import { Flame, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PostReactions } from "@/components/feed/PostReactions";
+import { PostComments } from "@/components/feed/PostComments";
 
 interface Post {
   id: string;
@@ -22,6 +23,9 @@ interface Post {
   username?: string;
   avatar_url?: string | null;
   post_likes: Array<{ user_id: string }>;
+  reactions?: Record<string, number>;
+  user_reactions?: string[];
+  comments_count?: number;
 }
 
 const Index = () => {
@@ -29,7 +33,8 @@ const Index = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState("");
   const [loading, setLoading] = useState(false);
-  const [animatingLike, setAnimatingLike] = useState<string | null>(null);
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -44,43 +49,109 @@ const Index = () => {
 
       if (postsError) throw postsError;
 
-      // Fetch profiles for each post
-      const postsWithProfiles = await Promise.all(
+      // Fetch additional data for each post
+      const postsWithData = await Promise.all(
         (postsData || []).map(async (post) => {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("username, avatar_url")
-            .eq("id", post.user_id)
-            .single();
+          const [profileData, reactionsData, commentsData] = await Promise.all([
+            supabase
+              .from("profiles")
+              .select("username, avatar_url")
+              .eq("id", post.user_id)
+              .single(),
+            supabase
+              .from("post_reactions")
+              .select("reaction, user_id")
+              .eq("post_id", post.id),
+            supabase
+              .from("post_comments")
+              .select("id", { count: "exact" })
+              .eq("post_id", post.id)
+          ]);
+
+          // Aggregate reactions
+          const reactions: Record<string, number> = {};
+          const userReactions: string[] = [];
+          
+          reactionsData.data?.forEach(r => {
+            reactions[r.reaction] = (reactions[r.reaction] || 0) + 1;
+            if (r.user_id === user?.id) {
+              userReactions.push(r.reaction);
+            }
+          });
 
           return {
             ...post,
-            username: profile?.username || "Usuário",
-            avatar_url: profile?.avatar_url,
+            username: profileData.data?.username || "Usuário",
+            avatar_url: profileData.data?.avatar_url,
+            reactions,
+            user_reactions: userReactions,
+            comments_count: commentsData.count || 0
           };
         })
       );
 
-      setPosts(postsWithProfiles);
+      setPosts(postsWithData);
     } catch (error: any) {
       console.error("Error fetching posts:", error);
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor, selecione uma imagem");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem muito grande (máx 5MB)");
+      return;
+    }
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}/${Math.random()}.${fileExt}`;
+
+      const { error: uploadError, data } = await supabase.storage
+        .from('post-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-images')
+        .getPublicUrl(data.path);
+
+      setPendingImage(publicUrl);
+      toast.success("Imagem carregada!");
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error("Erro ao carregar imagem");
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleCreatePost = async () => {
-    if (!newPost.trim() || !user) return;
+    if ((!newPost.trim() && !pendingImage) || !user) return;
     
     setLoading(true);
     try {
       const { error } = await supabase.from("posts").insert({
         user_id: user.id,
         content: newPost,
+        image_url: pendingImage,
         points_earned: 50,
       });
 
       if (error) throw error;
       
       setNewPost("");
+      setPendingImage(null);
       toast.success("Post publicado! +50 pontos!");
       fetchPosts();
     } catch (error: any) {
@@ -90,34 +161,6 @@ const Index = () => {
     }
   };
 
-  const handleLike = async (postId: string) => {
-    if (!user) return;
-
-    const post = posts.find(p => p.id === postId);
-    const isLiked = post?.post_likes.some(like => like.user_id === user.id);
-
-    setAnimatingLike(postId);
-    setTimeout(() => setAnimatingLike(null), 600);
-
-    try {
-      if (isLiked) {
-        await supabase
-          .from("post_likes")
-          .delete()
-          .eq("post_id", postId)
-          .eq("user_id", user.id);
-      } else {
-        await supabase.from("post_likes").insert({
-          post_id: postId,
-          user_id: user.id,
-        });
-      }
-      
-      fetchPosts();
-    } catch (error: any) {
-      console.error("Error toggling like:", error);
-    }
-  };
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -152,14 +195,50 @@ const Index = () => {
               onChange={(e) => setNewPost(e.target.value)}
               className="min-h-[100px] resize-none"
             />
+            
+            {pendingImage && (
+              <div className="relative">
+                <img 
+                  src={pendingImage} 
+                  alt="Preview" 
+                  className="w-full max-h-64 object-cover rounded-lg"
+                />
+                <Button
+                  size="icon"
+                  variant="destructive"
+                  className="absolute top-2 right-2"
+                  onClick={() => setPendingImage(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+
             <div className="flex justify-between items-center">
-              <p className="text-sm text-muted-foreground">
-                💰 Ganhe 50 pontos por post + 10 pontos por curtida
-              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                </Button>
+                <p className="text-sm text-muted-foreground">
+                  💰 50 pontos por post
+                </p>
+              </div>
               <Button 
                 onClick={handleCreatePost}
                 className="gradient-fire hover:opacity-90"
-                disabled={loading}
+                disabled={loading || (!newPost.trim() && !pendingImage)}
               >
                 <Flame className="w-4 h-4 mr-2" />
                 Publicar
@@ -170,8 +249,6 @@ const Index = () => {
 
         <div className="space-y-4">
           {posts.map((post) => {
-            const isLiked = post.post_likes.some(like => like.user_id === user?.id);
-            
             return (
               <Card key={post.id} className="hover-lift overflow-hidden border-2 border-border/50">
                 <CardContent className="pt-6 space-y-4">
@@ -190,9 +267,11 @@ const Index = () => {
                     </div>
                   </div>
 
-                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                    {post.content}
-                  </p>
+                  {post.content && (
+                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                      {post.content}
+                    </p>
+                  )}
 
                   {post.image_url && (
                     <img 
@@ -213,33 +292,16 @@ const Index = () => {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-4 pt-2 border-t border-border/50">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleLike(post.id)}
-                      className={cn(
-                        "gap-2 transition-all",
-                        isLiked && "text-primary"
-                      )}
-                    >
-                      <Flame 
-                        className={cn(
-                          "w-5 h-5",
-                          animatingLike === post.id && "fire-animation"
-                        )} 
-                      />
-                      <span className="font-semibold">{post.likes_count}</span>
-                    </Button>
-                    
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <MessageCircle className="w-5 h-5" />
-                      Comentar
-                    </Button>
-                    
-                    <Button variant="ghost" size="sm" className="gap-2 ml-auto">
-                      <Share2 className="w-5 h-5" />
-                    </Button>
+                  <div className="pt-2 border-t border-border/50 space-y-3">
+                    <PostReactions 
+                      postId={post.id}
+                      initialReactions={post.reactions}
+                      userReactions={post.user_reactions}
+                    />
+                    <PostComments 
+                      postId={post.id}
+                      initialCount={post.comments_count}
+                    />
                   </div>
                 </CardContent>
               </Card>
