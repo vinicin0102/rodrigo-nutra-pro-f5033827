@@ -1,195 +1,261 @@
+import { useState, useEffect } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Flame, Trophy, Users, Sparkles, TrendingUp, Award, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
+import { Flame, Heart, MessageCircle, Share2, Image as ImageIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+interface Post {
+  id: string;
+  user_id: string;
+  content: string;
+  image_url: string | null;
+  result_amount: number | null;
+  points_earned: number;
+  likes_count: number;
+  created_at: string;
+  username?: string;
+  avatar_url?: string | null;
+  post_likes: Array<{ user_id: string }>;
+}
 
 const Index = () => {
+  const { user } = useAuth();
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [animatingLike, setAnimatingLike] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    try {
+      const { data: postsData, error: postsError } = await supabase
+        .from("posts")
+        .select("*, post_likes (user_id)")
+        .order("created_at", { ascending: false });
+
+      if (postsError) throw postsError;
+
+      // Fetch profiles for each post
+      const postsWithProfiles = await Promise.all(
+        (postsData || []).map(async (post) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("username, avatar_url")
+            .eq("id", post.user_id)
+            .single();
+
+          return {
+            ...post,
+            username: profile?.username || "Usuário",
+            avatar_url: profile?.avatar_url,
+          };
+        })
+      );
+
+      setPosts(postsWithProfiles);
+    } catch (error: any) {
+      console.error("Error fetching posts:", error);
+    }
+  };
+
+  const handleCreatePost = async () => {
+    if (!newPost.trim() || !user) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase.from("posts").insert({
+        user_id: user.id,
+        content: newPost,
+        points_earned: 50,
+      });
+
+      if (error) throw error;
+      
+      setNewPost("");
+      toast.success("Post publicado! +50 pontos!");
+      fetchPosts();
+    } catch (error: any) {
+      toast.error("Erro ao publicar post");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async (postId: string) => {
+    if (!user) return;
+
+    const post = posts.find(p => p.id === postId);
+    const isLiked = post?.post_likes.some(like => like.user_id === user.id);
+
+    setAnimatingLike(postId);
+    setTimeout(() => setAnimatingLike(null), 600);
+
+    try {
+      if (isLiked) {
+        await supabase
+          .from("post_likes")
+          .delete()
+          .eq("post_id", postId)
+          .eq("user_id", user.id);
+      } else {
+        await supabase.from("post_likes").insert({
+          post_id: postId,
+          user_id: user.id,
+        });
+      }
+      
+      fetchPosts();
+    } catch (error: any) {
+      console.error("Error toggling like:", error);
+    }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (seconds < 60) return "Agora";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}min atrás`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h atrás`;
+    return `${Math.floor(seconds / 86400)}d atrás`;
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8 md:pt-24">
       <Navigation />
       
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <div className="text-center space-y-4 py-8">
-          <Badge className="gradient-elite text-lg px-4 py-1">
-            Bem-vindo ao Elite
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold">
-            <span className="text-gradient-fire">NutraHub Elite</span>
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        <div className="text-center space-y-2 py-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
+            Feed da Comunidade
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            A comunidade exclusiva de vendedores de alto desempenho em encapsulados
+          <p className="text-muted-foreground">
+            Compartilhe seus resultados e inspire a comunidade
           </p>
-          <div className="flex flex-wrap justify-center gap-4 pt-4">
-            <Link to="/community">
-              <Button size="lg" className="gradient-fire hover:opacity-90 text-lg">
-                Entrar na Comunidade
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </Link>
-            <Link to="/ai-copy">
-              <Button size="lg" variant="outline" className="border-primary/50 text-lg">
-                <Sparkles className="w-5 h-5 mr-2" />
-                Testar IA Grátis
-              </Button>
-            </Link>
-          </div>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-4">
-          <Card className="hover-lift border-2 border-primary/20">
-            <CardContent className="pt-6 text-center space-y-2">
-              <div className="w-16 h-16 mx-auto rounded-full gradient-fire flex items-center justify-center">
-                <Flame className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-bold text-xl">1.250</h3>
-              <p className="text-sm text-muted-foreground">Seus Pontos</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-lift border-2 border-accent/20">
-            <CardContent className="pt-6 text-center space-y-2">
-              <div className="w-16 h-16 mx-auto rounded-full gradient-elite flex items-center justify-center">
-                <Trophy className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-bold text-xl">#12</h3>
-              <p className="text-sm text-muted-foreground">Ranking Geral</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-lift border-2 border-primary/20">
-            <CardContent className="pt-6 text-center space-y-2">
-              <div className="w-16 h-16 mx-auto rounded-full bg-secondary flex items-center justify-center">
-                <TrendingUp className="w-8 h-8 text-secondary-foreground" />
-              </div>
-              <h3 className="font-bold text-xl">R$ 45K</h3>
-              <p className="text-sm text-muted-foreground">Vendas do Mês</p>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-lift border-2 border-accent/20">
-            <CardContent className="pt-6 text-center space-y-2">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
-                <Award className="w-8 h-8 text-white" />
-              </div>
-              <h3 className="font-bold text-xl">Ouro</h3>
-              <p className="text-sm text-muted-foreground">Seu Nível</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <Link to="/community">
-            <Card className="hover-lift h-full border-2 border-primary/30 cursor-pointer transition-all hover:border-primary/60">
-              <CardContent className="pt-6 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg gradient-fire flex items-center justify-center flex-shrink-0">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">Comunidade Elite</h3>
-                    <p className="text-sm text-muted-foreground">Compartilhe resultados e inspire</p>
-                  </div>
-                </div>
-                <p className="text-muted-foreground">
-                  Conecte-se com outros vendedores de alto desempenho, compartilhe suas conquistas e aprenda estratégias vencedoras.
-                </p>
-                <div className="flex items-center gap-2 text-sm">
-                  <Flame className="w-4 h-4 text-primary" />
-                  <span className="font-semibold">+50 pontos por post com resultado</span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/ranking">
-            <Card className="hover-lift h-full border-2 border-accent/30 cursor-pointer transition-all hover:border-accent/60">
-              <CardContent className="pt-6 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg gradient-elite flex items-center justify-center flex-shrink-0">
-                    <Trophy className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">Ranking & Prêmios</h3>
-                    <p className="text-sm text-muted-foreground">Conquiste placas exclusivas</p>
-                  </div>
-                </div>
-                <p className="text-muted-foreground">
-                  Suba no ranking mensal e conquiste placas de faturamento. Troque pontos por prêmios incríveis e mentorias exclusivas.
-                </p>
-                <div className="flex items-center gap-2 text-sm">
-                  <Award className="w-4 h-4 text-accent" />
-                  <span className="font-semibold">Próxima placa: Platina (R$ 100K)</span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/ai-copy">
-            <Card className="hover-lift h-full border-2 border-primary/30 cursor-pointer transition-all hover:border-primary/60">
-              <CardContent className="pt-6 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">IA de Copy</h3>
-                    <p className="text-sm text-muted-foreground">Anúncios persuasivos em segundos</p>
-                  </div>
-                </div>
-                <p className="text-muted-foreground">
-                  Crie títulos matadores, descrições completas e copies que convertem usando inteligência artificial avançada.
-                </p>
-                <Badge variant="secondary">Powered by AI</Badge>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link to="/ai-creative">
-            <Card className="hover-lift h-full border-2 border-accent/30 cursor-pointer transition-all hover:border-accent/60">
-              <CardContent className="pt-6 space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-accent to-yellow-500 flex items-center justify-center flex-shrink-0">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">IA de Criativo</h3>
-                    <p className="text-sm text-muted-foreground">Roteiros completos de vídeo</p>
-                  </div>
-                </div>
-                <p className="text-muted-foreground">
-                  Gere ganchos, retenção, valor e CTAs profissionais para seus vídeos de vendas em minutos.
-                </p>
-                <Badge variant="secondary">Powered by AI</Badge>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-
-        <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold">Comece Agora Sua Jornada Elite</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Junte-se a centenas de vendedores que já estão transformando suas vendas com nossas ferramentas de IA e comunidade exclusiva.
+        <Card className="border-2 border-primary/20">
+          <CardContent className="pt-6 space-y-4">
+            <Textarea
+              placeholder="Compartilhe seu resultado de vendas..."
+              value={newPost}
+              onChange={(e) => setNewPost(e.target.value)}
+              className="min-h-[100px] resize-none"
+            />
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                💰 Ganhe 50 pontos por post + 10 pontos por curtida
               </p>
-              <div className="flex flex-wrap justify-center gap-4 pt-4">
-                <Link to="/community">
-                  <Button size="lg" className="gradient-fire hover:opacity-90">
-                    <Users className="w-5 h-5 mr-2" />
-                    Entrar na Comunidade
-                  </Button>
-                </Link>
-                <Link to="/support">
-                  <Button size="lg" variant="outline" className="border-primary/50">
-                    Falar com Suporte
-                  </Button>
-                </Link>
-              </div>
+              <Button 
+                onClick={handleCreatePost}
+                className="gradient-fire hover:opacity-90"
+                disabled={loading}
+              >
+                <Flame className="w-4 h-4 mr-2" />
+                Publicar
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        <div className="space-y-4">
+          {posts.map((post) => {
+            const isLiked = post.post_likes.some(like => like.user_id === user?.id);
+            
+            return (
+              <Card key={post.id} className="hover-lift overflow-hidden border-2 border-border/50">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-12 h-12 border-2 border-primary/20">
+                      <AvatarImage src={post.avatar_url || undefined} />
+                      <AvatarFallback className="bg-gradient-fire text-white">
+                        {(post.username || "U").substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-semibold">{post.username || "Usuário"}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatTimeAgo(post.created_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                    {post.content}
+                  </p>
+
+                  {post.image_url && (
+                    <img 
+                      src={post.image_url} 
+                      alt="Post image"
+                      className="w-full rounded-lg object-cover max-h-96"
+                    />
+                  )}
+
+                  {post.result_amount && (
+                    <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
+                      <p className="text-sm font-medium text-muted-foreground mb-1">
+                        Resultado de Vendas
+                      </p>
+                      <p className="text-2xl font-bold text-gradient-fire">
+                        R$ {post.result_amount.toLocaleString("pt-BR")}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-4 pt-2 border-t border-border/50">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleLike(post.id)}
+                      className={cn(
+                        "gap-2 transition-all",
+                        isLiked && "text-primary"
+                      )}
+                    >
+                      <Flame 
+                        className={cn(
+                          "w-5 h-5",
+                          animatingLike === post.id && "fire-animation"
+                        )} 
+                      />
+                      <span className="font-semibold">{post.likes_count}</span>
+                    </Button>
+                    
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <MessageCircle className="w-5 h-5" />
+                      Comentar
+                    </Button>
+                    
+                    <Button variant="ghost" size="sm" className="gap-2 ml-auto">
+                      <Share2 className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+
+          {posts.length === 0 && (
+            <Card className="border-2 border-dashed border-border/50">
+              <CardContent className="pt-6 text-center py-12">
+                <p className="text-muted-foreground">
+                  Seja o primeiro a compartilhar seus resultados! 🚀
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );
