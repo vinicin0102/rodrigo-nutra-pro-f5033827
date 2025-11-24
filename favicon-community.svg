@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="fireGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA726;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle with gradient -->
+  <circle cx="32" cy="32" r="30" fill="url(#fireGradient)"/>
+  
+  <!-- Main flame shape -->
+  <path d="M32 12C28 12 24 16 24 22C24 26 26 30 28 34C29 37 30 40 30 42C30 44 28 46 26 46C24 46 22 44 22 42C22 40 21 37 20 34C19 30 18 26 18 22C18 16 22 12 26 12C28 12 30 12 32 12Z" fill="white" opacity="0.95" filter="url(#glow)"/>
+  
+  <!-- Secondary flame -->
+  <path d="M36 14C40 14 42 18 42 24C42 27 40 30 38 33C37 35 36 37 36 39C36 40 37 41 38 41C39 41 40 40 40 39C40 37 41 35 42 33C43 30 44 27 44 24C44 18 42 14 38 14C37 14 36 14 36 14Z" fill="white" opacity="0.85"/>
+  
+  <!-- Flame core -->
+  <path d="M32 16C34 16 36 18 36 21C36 23 34 26 32 29C30 26 28 23 28 21C28 18 30 16 32 16Z" fill="white"/>
+  
+  <!-- Community dots (representing people/members) -->
+  <circle cx="16" cy="18" r="2.5" fill="white" opacity="0.8"/>
+  <circle cx="48" cy="18" r="2.5" fill="white" opacity="0.8"/>
+  <circle cx="16" cy="46" r="2.5" fill="white" opacity="0.8"/>
+  <circle cx="48" cy="46" r="2.5" fill="white" opacity="0.8"/>
+</svg>
+

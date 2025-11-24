@@ -62,7 +62,53 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/cabb74b3-e492-44cc-9596-ef2e8c15db3a) and click on Share -> Publish.
+### Deploy Automático no Vercel
+
+Este projeto está configurado para deploy automático no Vercel (Project ID: `prj_17JwesA0eAU0J1pQyy5iczmCoJPP`).
+
+#### Opção 1: Conectar via Interface Web (Recomendado)
+
+1. **Conecte seu repositório ao projeto existente:**
+   - Acesse [vercel.com](https://vercel.com) e faça login
+   - Vá para o seu projeto (ID: `prj_17JwesA0eAU0J1pQyy5iczmCoJPP`)
+   - Vá em Settings → Git
+   - Conecte seu repositório Git (GitHub, GitLab ou Bitbucket)
+   - O Vercel detectará automaticamente as configurações do `vercel.json`
+
+2. **Configure as variáveis de ambiente:**
+   - No painel do Vercel, vá em Settings → Environment Variables
+   - Adicione as seguintes variáveis (ou verifique se já estão configuradas):
+     - `VITE_SUPABASE_URL`: Sua URL do Supabase
+     - `VITE_SUPABASE_PUBLISHABLE_KEY`: Sua chave pública do Supabase
+   - Certifique-se de adicionar para todos os ambientes (Production, Preview, Development)
+
+3. **Deploy automático:**
+   - Após conectar, cada push para a branch principal fará deploy automático
+   - Você pode configurar preview deployments para outras branches nas configurações
+
+#### Opção 2: Conectar via Vercel CLI
+
+Se preferir usar a CLI:
+
+```sh
+# Instalar Vercel CLI globalmente
+npm install -g vercel
+
+# Vincular ao projeto existente
+vercel link
+
+# Fazer deploy
+vercel --prod
+```
+
+O arquivo `vercel.json` já está configurado com as opções corretas para este projeto Vite + React, incluindo:
+- Configuração de build para Vite
+- Rewrites para React Router (SPA)
+- Cache headers otimizados para assets estáticos
+
+### Deploy via Lovable
+
+Alternativamente, você pode abrir [Lovable](https://lovable.dev/projects/cabb74b3-e492-44cc-9596-ef2e8c15db3a) e clicar em Share -> Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 
