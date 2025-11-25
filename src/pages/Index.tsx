@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { PostReactions } from "@/components/feed/PostReactions";
 import { PostComments } from "@/components/feed/PostComments";
+import { DiamondAnimation } from "@/components/DiamondAnimation";
 
 interface Post {
   id: string;
@@ -34,6 +35,8 @@ const Index = () => {
   const [newPost, setNewPost] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [showDiamondAnimation, setShowDiamondAnimation] = useState(false);
+  const [earnedPoints, setEarnedPoints] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -152,7 +155,12 @@ const Index = () => {
       
       setNewPost("");
       setPendingImage(null);
-      toast.success("Post publicado! +50 pontos!");
+      
+      // Show diamond animation
+      setEarnedPoints(50);
+      setShowDiamondAnimation(true);
+      
+      toast.success("Post publicado com sucesso!");
       fetchPosts();
     } catch (error: any) {
       toast.error("Erro ao publicar post");
@@ -176,6 +184,13 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8 md:pt-24">
       <Navigation />
+      
+      {showDiamondAnimation && (
+        <DiamondAnimation 
+          points={earnedPoints} 
+          onComplete={() => setShowDiamondAnimation(false)}
+        />
+      )}
       
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         <div className="text-center space-y-2 py-4">

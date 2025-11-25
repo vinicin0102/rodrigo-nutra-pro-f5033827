@@ -12,6 +12,7 @@ import Rewards from "./pages/Rewards";
 import AICopy from "./pages/AICopy";
 import AICreative from "./pages/AICreative";
 import Support from "./pages/Support";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/ai-copy" element={<ProtectedRoute requireDiamond><AICopy /></ProtectedRoute>} />
           <Route path="/ai-creative" element={<ProtectedRoute requireDiamond><AICreative /></ProtectedRoute>} />
           <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

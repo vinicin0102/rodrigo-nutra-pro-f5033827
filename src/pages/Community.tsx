@@ -299,14 +299,14 @@ const Community = () => {
                           <span className="text-xs font-semibold mb-1 px-1">
                             {isOwn ? 'Você' : username}
                           </span>
-                          <div className={cn(
-                            "rounded-2xl px-4 py-2 break-words",
+                         <div className={cn(
+                            "rounded-2xl px-4 py-3 break-words backdrop-blur-sm transition-all hover:scale-[1.02]",
                             isOwn 
-                              ? "bg-primary text-primary-foreground rounded-tr-sm shadow-md" 
-                              : "bg-secondary text-secondary-foreground border border-border rounded-tl-sm shadow-sm"
+                              ? "bg-gradient-to-br from-cyan-500/90 to-blue-600/90 text-white rounded-tr-sm shadow-lg shadow-cyan-500/30 border border-white/20" 
+                              : "bg-gradient-to-br from-slate-800/90 to-slate-700/90 text-white border border-slate-600/50 rounded-tl-sm shadow-lg"
                           )}>
                             {message.content && (
-                              <p className="text-sm leading-relaxed">{message.content}</p>
+                              <p className="text-sm leading-relaxed font-medium">{message.content}</p>
                             )}
                             {message.image_url && (
                               <img 
@@ -320,14 +320,19 @@ const Community = () => {
                                 variant="secondary"
                                 size="sm"
                                 onClick={() => handlePlayAudio(message.audio_url!)}
-                                className="mt-2"
+                                className="mt-2 bg-white/10 hover:bg-white/20 border-white/20 text-white"
                               >
                                 {playingAudio === message.audio_url ? (
-                                  <Pause className="w-4 h-4 mr-2" />
+                                  <>
+                                    <Pause className="w-4 h-4 mr-2 animate-pulse" />
+                                    Pausar
+                                  </>
                                 ) : (
-                                  <Play className="w-4 h-4 mr-2" />
+                                  <>
+                                    <Play className="w-4 h-4 mr-2" />
+                                    Reproduzir Áudio
+                                  </>
                                 )}
-                                Áudio
                               </Button>
                             )}
                           </div>
