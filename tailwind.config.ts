@@ -77,11 +77,29 @@ export default {
           "50%": { transform: "scale(0.9)" },
           "100%": { transform: "scale(1)" },
         },
+        "badge-pop": {
+          "0%": { 
+            opacity: "0", 
+            transform: "scale(0) rotate(-180deg)" 
+          },
+          "60%": { 
+            opacity: "1", 
+            transform: "scale(1.3) rotate(10deg)" 
+          },
+          "80%": { 
+            transform: "scale(0.9) rotate(-5deg)" 
+          },
+          "100%": { 
+            opacity: "1", 
+            transform: "scale(1) rotate(0deg)" 
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "heart-beat": "heart-beat 0.3s ease-in-out",
+        "badge-pop": "badge-pop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
       },
     },
   },
