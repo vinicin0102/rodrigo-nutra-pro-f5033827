@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, X, Play, Pause } from "lucide-react";
+import { Send, X, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,7 @@ import { MediaUpload } from "@/components/community/MediaUpload";
 import { EmojiPicker } from "@/components/community/EmojiPicker";
 import { TypingIndicator } from "@/components/community/TypingIndicator";
 import { OnlineMembers } from "@/components/community/OnlineMembers";
+import { AudioPlayer } from "@/components/community/AudioPlayer";
 
 interface Message {
   id: string;
@@ -35,9 +36,7 @@ const Community = () => {
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -215,21 +214,6 @@ const Community = () => {
     }
   };
 
-  const handlePlayAudio = (audioUrl: string) => {
-    if (playingAudio === audioUrl) {
-      audioRef.current?.pause();
-      setPlayingAudio(null);
-    } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      audioRef.current = new Audio(audioUrl);
-      audioRef.current.play();
-      setPlayingAudio(audioUrl);
-      audioRef.current.onended = () => setPlayingAudio(null);
-    }
-  };
-
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -317,24 +301,12 @@ const Community = () => {
                               />
                             )}
                             {message.audio_url && (
-                              <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => handlePlayAudio(message.audio_url!)}
-                                className="mt-2 bg-white/10 hover:bg-white/20 border-white/20 text-white"
-                              >
-                                {playingAudio === message.audio_url ? (
-                                  <>
-                                    <Pause className="w-4 h-4 mr-2 animate-pulse" />
-                                    Pausar
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="w-4 h-4 mr-2" />
-                                    Reproduzir Áudio
-                                  </>
-                                )}
-                              </Button>
+                              <div className="mt-2">
+                                <AudioPlayer 
+                                  audioUrl={message.audio_url} 
+                                  isOwn={isOwn}
+                                />
+                              </div>
                             )}
                           </div>
                           <span className="text-xs text-muted-foreground mt-1 px-1">
