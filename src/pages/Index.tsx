@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { PostReactions } from "@/components/feed/PostReactions";
 import { PostComments } from "@/components/feed/PostComments";
 import { DiamondAnimation } from "@/components/DiamondAnimation";
+import { ChallengesWidget } from "@/components/ChallengesWidget";
 
 interface Post {
   id: string;
@@ -201,6 +202,8 @@ const Index = () => {
             Compartilhe seus resultados e inspire a comunidade
           </p>
         </div>
+
+        <ChallengesWidget />
 
         <Card className="border-2 border-primary/20">
           <CardContent className="pt-6 space-y-4">

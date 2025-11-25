@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenges: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          description: string
+          end_date: string
+          icon: string | null
+          id: string
+          reward_points: number
+          start_date: string
+          target_value: number
+          title: string
+          type: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          description: string
+          end_date: string
+          icon?: string | null
+          id?: string
+          reward_points: number
+          start_date: string
+          target_value: number
+          title: string
+          type: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          description?: string
+          end_date?: string
+          icon?: string | null
+          id?: string
+          reward_points?: number
+          start_date?: string
+          target_value?: number
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       community_messages: {
         Row: {
           audio_url: string | null
@@ -309,6 +354,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_challenges: {
+        Row: {
+          challenge_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_value: number
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_value?: number
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -348,6 +434,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      update_challenge_progress: {
+        Args: { p_category: string; p_increment?: number; p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
