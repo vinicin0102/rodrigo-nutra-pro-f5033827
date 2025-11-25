@@ -174,14 +174,39 @@ const Community = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if ((!newMessage.trim() && !pendingImage && !pendingAudio) || !user) return;
+    console.log('🚀 handleSendMessage called');
+    console.log('📊 State:', { 
+      user: user?.id, 
+      newMessage: newMessage.length, 
+      pendingImage: !!pendingImage, 
+      pendingAudio: !!pendingAudio 
+    });
+
+    if (!user) {
+      console.error('❌ No user - returning early');
+      toast({
+        title: "Erro de autenticação",
+        description: "Você precisa estar logado para enviar mensagens",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newMessage.trim() && !pendingImage && !pendingAudio) {
+      console.log('⚠️ No content to send - returning early');
+      return;
+    }
 
     try {
+      console.log('✅ Starting message send...');
       let audioUrl = null;
       if (pendingAudio) {
+        console.log('🎵 Uploading audio...');
         audioUrl = await uploadAudio(pendingAudio);
+        console.log('✅ Audio uploaded:', audioUrl);
       }
 
+      console.log('💾 Inserting message to database...');
       const { error } = await supabase
         .from('community_messages')
         .insert({
@@ -191,8 +216,12 @@ const Community = () => {
           audio_url: audioUrl,
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Database error:', error);
+        throw error;
+      }
 
+      console.log('✅ Message sent successfully!');
       setNewMessage("");
       setPendingImage(null);
       setPendingAudio(null);
@@ -205,10 +234,10 @@ const Community = () => {
         .eq('channel', 'community');
 
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Error sending message:', error);
       toast({
         title: "Erro ao enviar mensagem",
-        description: "Tente novamente",
+        description: error instanceof Error ? error.message : "Tente novamente",
         variant: "destructive",
       });
     }
@@ -383,6 +412,12 @@ const Community = () => {
                 onChange={(e) => {
                   setNewMessage(e.target.value);
                   handleTyping();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage(e as any);
+                  }
                 }}
                 placeholder="Digite sua mensagem..."
                 className="flex-1"
