@@ -19,15 +19,25 @@ export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Detectar formato de áudio mais compatível
+      // Detectar formato de áudio mais compatível (priorizar Safari/iOS)
       const getSupportedMimeType = () => {
-        const types = [
-          'audio/webm;codecs=opus',
-          'audio/webm',
-          'audio/ogg;codecs=opus',
-          'audio/mp4',
-          'audio/ogg'
-        ];
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        const types = isSafari 
+          ? [
+              'audio/mp4',
+              'audio/aac',
+              'audio/webm;codecs=opus',
+              'audio/webm',
+              'audio/ogg'
+            ]
+          : [
+              'audio/webm;codecs=opus',
+              'audio/webm',
+              'audio/mp4',
+              'audio/ogg;codecs=opus',
+              'audio/ogg'
+            ];
         
         for (const type of types) {
           if (MediaRecorder.isTypeSupported(type)) {
