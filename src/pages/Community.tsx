@@ -286,8 +286,24 @@ const Community = () => {
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
+  // Gera cor consistente baseada no user_id
+  const getUserColor = (userId: string) => {
+    const colors = [
+      '#FF6B9D', // Rosa
+      '#FFB84D', // Amarelo/Laranja
+      '#A78BFA', // Roxo
+      '#60A5FA', // Azul
+      '#34D399', // Verde
+      '#F87171', // Vermelho
+      '#FCD34D', // Amarelo
+      '#C084FC', // Roxo claro
+    ];
+    const index = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return colors[index % colors.length];
+  };
+
   return (
-    <div className="h-screen overflow-hidden bg-background flex flex-col md:pt-24">
+    <div className="h-screen overflow-hidden flex flex-col md:pt-24" style={{ backgroundColor: '#0A0A0A' }}>
       <Navigation />
       
       <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-16 md:pb-6">
@@ -309,74 +325,73 @@ const Community = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 bg-muted/30 rounded-t-lg border border-border overflow-hidden">
+            <div className="flex-1 min-h-0 rounded-t-lg overflow-hidden" style={{ backgroundColor: '#0A0A0A' }}>
               <ScrollArea className="h-full overscroll-contain">
-              <div ref={scrollRef} className="p-4 space-y-4">
+              <div ref={scrollRef} className="p-4 space-y-2">
                 {loading ? (
-                  <div className="text-center text-muted-foreground py-8">
+                  <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
                     Carregando mensagens...
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
+                  <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
                     Seja o primeiro a enviar uma mensagem! 👋
                   </div>
                 ) : (
-                  messages.map((message) => {
+                  messages.map((message, idx) => {
                     const isOwn = message.user_id === user?.id;
                     const username = message.profiles?.username || 'Usuário';
                     const initials = username.split(' ').map(n => n[0]).join('').toUpperCase();
+                    const userColor = getUserColor(message.user_id);
+                    
+                    // Mostrar avatar apenas se for diferente da mensagem anterior
+                    const prevMessage = idx > 0 ? messages[idx - 1] : null;
+                    const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id;
 
                     return (
                       <div
                         key={message.id}
-                        className={cn(
-                          "flex gap-2 items-start",
-                          isOwn && "flex-row-reverse"
-                        )}
+                        className="flex gap-3 items-start"
                       >
-                        <Avatar className="w-8 h-8 mt-1">
-                          <AvatarImage src={message.profiles?.avatar_url || ''} />
-                          <AvatarFallback className={cn(
-                            "text-xs",
-                            isOwn ? "bg-gradient-fire text-white" : "bg-muted"
-                          )}>
-                            {initials}
-                          </AvatarFallback>
-                        </Avatar>
+                        {showAvatar ? (
+                          <Avatar className="w-10 h-10 flex-shrink-0">
+                            <AvatarImage src={message.profiles?.avatar_url || ''} />
+                            <AvatarFallback style={{ backgroundColor: userColor }} className="text-white text-xs">
+                              {initials}
+                            </AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <div className="w-10 flex-shrink-0" />
+                        )}
                         
-                        <div className={cn(
-                          "flex flex-col max-w-[70%]",
-                          isOwn && "items-end"
-                        )}>
-                          <span className="text-xs font-semibold mb-1 px-1">
-                            {isOwn ? 'Você' : username}
-                          </span>
-                         <div className={cn(
-                            "rounded-2xl px-4 py-3 break-words backdrop-blur-sm transition-all hover:scale-[1.02]",
-                            isOwn 
-                              ? "bg-gradient-to-br from-cyan-500/90 to-blue-600/90 text-white rounded-tr-sm shadow-lg shadow-cyan-500/30 border border-white/20" 
-                              : "bg-gradient-to-br from-slate-800/90 to-slate-700/90 text-white border border-slate-600/50 rounded-tl-sm shadow-lg"
-                          )}>
+                        <div className="flex-1 min-w-0">
+                          {showAvatar && (
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="text-sm font-semibold" style={{ color: userColor }}>
+                                {username}
+                              </span>
+                            </div>
+                          )}
+                          
+                          <div className="rounded-lg px-3 py-2" style={{ backgroundColor: '#1F1F1F' }}>
                             {message.content && (
-                              <p className="text-sm leading-relaxed font-medium">{message.content}</p>
+                              <p className="text-sm text-gray-200 leading-relaxed">{message.content}</p>
                             )}
                             {message.image_url && (
                               <img 
                                 src={message.image_url} 
                                 alt="Mensagem"
-                                className="rounded-lg mt-2 max-w-full h-auto"
+                                className="rounded-lg mt-2 max-w-xs h-auto"
                               />
                             )}
                             {message.audio_url && (
-                              <div className="mt-2">
-                                <AudioPlayer 
-                                  audioUrl={message.audio_url} 
-                                  isOwn={isOwn}
-                                />
+                              <div className="mt-2 flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
+                                <Play className="w-4 h-4 text-gray-400" />
+                                <span className="text-xs text-gray-400">0:04 Áudio</span>
                               </div>
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground mt-1 px-1">
+                          
+                          <span className="text-xs text-gray-500 mt-1 inline-block">
                             {formatTime(message.created_at)}
                           </span>
                         </div>
@@ -392,7 +407,8 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 bg-background border border-t-0 border-border rounded-b-lg p-4"
+              className="flex-shrink-0 rounded-b-lg p-4"
+              style={{ backgroundColor: '#1F1F1F', borderTop: '1px solid #2A2A2A' }}
             >
             {/* Preview attachments */}
             {(pendingImage || pendingAudio) && (
@@ -416,7 +432,7 @@ const Community = () => {
                   </div>
                 )}
                 {pendingAudio && pendingAudioUrl && (
-                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg max-h-14">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg max-h-14" style={{ backgroundColor: '#1F1F1F' }}>
                     <div className="flex-1 min-w-0 max-w-[200px]">
                       <AudioPlayer audioUrl={pendingAudioUrl} isOwn={true} />
                     </div>
@@ -424,7 +440,7 @@ const Community = () => {
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 flex-shrink-0"
+                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white"
                       onClick={handleRerecordAudio}
                       title="Regravar"
                     >
@@ -434,7 +450,7 @@ const Community = () => {
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 flex-shrink-0"
+                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white"
                       onClick={() => {
                         if (pendingAudioUrl) {
                           URL.revokeObjectURL(pendingAudioUrl);
@@ -476,7 +492,7 @@ const Community = () => {
                   }
                 }}
                 placeholder="Digite sua mensagem..."
-                className="flex-1"
+                className="flex-1 bg-black/50 border-gray-700 text-gray-200 placeholder:text-gray-500"
                 autoFocus
               />
               <Button 
