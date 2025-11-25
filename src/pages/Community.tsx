@@ -303,19 +303,14 @@ const Community = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col md:pt-24" style={{ backgroundColor: '#0A0A0A' }}>
+    <div className="h-screen overflow-hidden flex flex-col md:pt-16" style={{ backgroundColor: '#0A0A0A' }}>
       <Navigation />
       
-      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-16 md:pb-6">
-        <div className="max-w-6xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
-          {/* Sidebar - Members */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <OnlineMembers />
-          </div>
-
+      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-24 md:pb-8">
+        <div className="max-w-4xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
           {/* Main Chat */}
           <div className="flex-1 flex flex-col min-w-0 min-h-0">
-            <div className="text-center space-y-2 mb-4 flex-shrink-0">
+            <div className="text-center space-y-2 mb-6 flex-shrink-0">
               <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
                 Comunidade Aberta
               </h1>
@@ -325,9 +320,9 @@ const Community = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 rounded-t-lg overflow-hidden" style={{ backgroundColor: '#0A0A0A' }}>
+            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#0A0A0A' }}>
               <ScrollArea className="h-full overscroll-contain">
-              <div ref={scrollRef} className="p-4 space-y-2">
+              <div ref={scrollRef} className="p-6 space-y-5">
                 {loading ? (
                   <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
                     Carregando mensagens...
@@ -350,48 +345,50 @@ const Community = () => {
                     return (
                       <div
                         key={message.id}
-                        className="flex gap-3 items-start"
+                        className="flex gap-3 items-start mb-3"
                       >
                         {showAvatar ? (
-                          <Avatar className="w-10 h-10 flex-shrink-0">
+                          <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-white/10">
                             <AvatarImage src={message.profiles?.avatar_url || ''} />
-                            <AvatarFallback style={{ backgroundColor: userColor }} className="text-white text-xs">
+                            <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
                         ) : (
-                          <div className="w-10 flex-shrink-0" />
+                          <div className="w-11 flex-shrink-0" />
                         )}
                         
                         <div className="flex-1 min-w-0">
                           {showAvatar && (
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="text-sm font-semibold" style={{ color: userColor }}>
+                            <div className="flex items-baseline gap-2 mb-2">
+                              <span className="text-base font-bold" style={{ color: userColor }}>
                                 {username}
                               </span>
                             </div>
                           )}
                           
-                          <div className="rounded-lg px-3 py-2" style={{ backgroundColor: '#1F1F1F' }}>
+                          <div className="rounded-xl px-4 py-3 max-w-lg" style={{ backgroundColor: '#1F1F1F' }}>
                             {message.content && (
-                              <p className="text-sm text-gray-200 leading-relaxed">{message.content}</p>
+                              <p className="text-sm text-gray-100 leading-relaxed">{message.content}</p>
                             )}
                             {message.image_url && (
                               <img 
                                 src={message.image_url} 
                                 alt="Mensagem"
-                                className="rounded-lg mt-2 max-w-xs h-auto"
+                                className="rounded-lg mt-3 max-w-xs h-auto"
                               />
                             )}
                             {message.audio_url && (
-                              <div className="mt-2 flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2">
-                                <Play className="w-4 h-4 text-gray-400" />
-                                <span className="text-xs text-gray-400">0:04 Áudio</span>
+                              <div className="mt-2">
+                                <AudioPlayer 
+                                  audioUrl={message.audio_url} 
+                                  isOwn={false}
+                                />
                               </div>
                             )}
                           </div>
                           
-                          <span className="text-xs text-gray-500 mt-1 inline-block">
+                          <span className="text-xs text-gray-500 mt-2 inline-block">
                             {formatTime(message.created_at)}
                           </span>
                         </div>
@@ -407,8 +404,8 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 rounded-b-lg p-4"
-              style={{ backgroundColor: '#1F1F1F', borderTop: '1px solid #2A2A2A' }}
+              className="flex-shrink-0 rounded-lg p-4 space-y-3"
+              style={{ backgroundColor: '#1F1F1F' }}
             >
             {/* Preview attachments */}
             {(pendingImage || pendingAudio) && (
@@ -432,7 +429,7 @@ const Community = () => {
                   </div>
                 )}
                 {pendingAudio && pendingAudioUrl && (
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg max-h-14" style={{ backgroundColor: '#1F1F1F' }}>
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-700" style={{ backgroundColor: '#0A0A0A' }}>
                     <div className="flex-1 min-w-0 max-w-[200px]">
                       <AudioPlayer audioUrl={pendingAudioUrl} isOwn={true} />
                     </div>
@@ -440,7 +437,7 @@ const Community = () => {
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white"
+                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white hover:bg-gray-800"
                       onClick={handleRerecordAudio}
                       title="Regravar"
                     >
@@ -450,7 +447,7 @@ const Community = () => {
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white"
+                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white hover:bg-gray-800"
                       onClick={() => {
                         if (pendingAudioUrl) {
                           URL.revokeObjectURL(pendingAudioUrl);
@@ -467,18 +464,27 @@ const Community = () => {
               </div>
             )}
 
-            <div className="flex gap-2">
-              <MediaUpload 
-                onImageSelected={setPendingImage}
-                disabled={!!pendingImage}
-              />
-              <AudioRecorder 
-                onAudioRecorded={handleAudioRecorded}
-                disabled={!!pendingAudio}
-              />
-              <EmojiPicker 
-                onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
-              />
+            <div className="flex gap-3 items-center">
+              <div className="flex-shrink-0">
+                <MediaUpload 
+                  onImageSelected={setPendingImage}
+                  disabled={!!pendingImage}
+                />
+              </div>
+              
+              <div className="flex-shrink-0">
+                <AudioRecorder 
+                  onAudioRecorded={handleAudioRecorded}
+                  disabled={!!pendingAudio}
+                />
+              </div>
+              
+              <div className="flex-shrink-0">
+                <EmojiPicker 
+                  onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
+                />
+              </div>
+              
               <Input
                 value={newMessage}
                 onChange={(e) => {
@@ -492,15 +498,16 @@ const Community = () => {
                   }
                 }}
                 placeholder="Digite sua mensagem..."
-                className="flex-1 bg-black/50 border-gray-700 text-gray-200 placeholder:text-gray-500"
+                className="flex-1 h-11 bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
                 autoFocus
               />
+              
               <Button 
                 type="submit"
                 disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
-                className="gradient-fire hover:opacity-90"
+                className="h-11 w-11 flex-shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700"
               >
-                <Send className="w-4 h-4" />
+                <Send className="w-5 h-5" />
               </Button>
               </div>
             </form>
