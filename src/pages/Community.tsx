@@ -236,29 +236,30 @@ const Community = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-8 md:pt-24 flex flex-col">
+    <div className="h-screen overflow-hidden bg-background flex flex-col md:pt-24">
       <Navigation />
       
-      <div className="max-w-6xl mx-auto px-4 py-6 flex gap-4 h-[calc(100vh-120px)] md:h-[calc(100vh-160px)] w-full">
-        {/* Sidebar - Members */}
-        <div className="hidden lg:block w-64 flex-shrink-0">
-          <OnlineMembers />
-        </div>
-
-        {/* Main Chat */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <div className="text-center space-y-2 mb-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
-              Comunidade Aberta
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Grupo de conversa da comunidade
-            </p>
+      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-16 md:pb-6">
+        <div className="max-w-6xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
+          {/* Sidebar - Members */}
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <OnlineMembers />
           </div>
 
-          {/* Messages Area */}
-          <div className="flex-1 bg-muted/30 rounded-t-lg border border-border overflow-hidden">
-            <ScrollArea className="h-full">
+          {/* Main Chat */}
+          <div className="flex-1 flex flex-col min-w-0 min-h-0">
+            <div className="text-center space-y-2 mb-4 flex-shrink-0">
+              <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
+                Comunidade Aberta
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                Grupo de conversa da comunidade
+              </p>
+            </div>
+
+            {/* Messages Area */}
+            <div className="flex-1 min-h-0 bg-muted/30 rounded-t-lg border border-border overflow-hidden">
+              <ScrollArea className="h-full overscroll-contain">
               <div ref={scrollRef} className="p-4 space-y-4">
                 {loading ? (
                   <div className="text-center text-muted-foreground py-8">
@@ -345,15 +346,15 @@ const Community = () => {
                   })
                 )}
               </div>
-            </ScrollArea>
-            <TypingIndicator />
-          </div>
+              </ScrollArea>
+              <TypingIndicator />
+            </div>
 
-          {/* Input Area */}
-          <form 
-            onSubmit={handleSendMessage}
-            className="bg-background border border-t-0 border-border rounded-b-lg p-4"
-          >
+            {/* Input Area */}
+            <form 
+              onSubmit={handleSendMessage}
+              className="flex-shrink-0 bg-background border border-t-0 border-border rounded-b-lg p-4"
+            >
             {/* Preview attachments */}
             {(pendingImage || pendingAudio) && (
               <div className="mb-2 flex gap-2">
@@ -422,8 +423,9 @@ const Community = () => {
               >
                 <Send className="w-4 h-4" />
               </Button>
-            </div>
-          </form>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
