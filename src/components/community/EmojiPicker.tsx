@@ -25,9 +25,10 @@ export const EmojiPicker = ({ onEmojiSelect, disabled }: EmojiPickerProps) => {
           size="icon"
           variant="ghost"
           disabled={disabled}
-          className="h-9 w-9"
+          className="h-11 w-11 bg-gradient-to-br from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white disabled:opacity-50"
+          title="Adicionar emoji"
         >
-          <Smile className="h-4 w-4" />
+          <Smile className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 border-none" align="end">

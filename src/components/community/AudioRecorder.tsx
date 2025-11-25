@@ -110,25 +110,26 @@ export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps)
           variant="ghost"
           onClick={startRecording}
           disabled={disabled}
-          className="h-9 w-9"
+          className="h-11 w-11 bg-gradient-to-br from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white disabled:opacity-50"
+          title="Gravar áudio"
         >
-          <Mic className="h-4 w-4" />
+          <Mic className="h-5 w-5" />
         </Button>
       ) : (
-        <div className="flex items-center gap-2 bg-destructive/10 px-3 py-1 rounded-full">
+        <div className="flex items-center gap-2 bg-red-500/20 px-4 py-2 rounded-full border border-red-500/30">
           <Button
             type="button"
             size="icon"
             variant="ghost"
             onClick={stopRecording}
-            className="h-7 w-7"
+            className="h-8 w-8 hover:bg-red-500/20"
           >
-            <Square className="h-4 w-4 fill-destructive text-destructive" />
+            <Square className="h-4 w-4 fill-red-500 text-red-500" />
           </Button>
-          <span className="text-sm font-medium text-destructive">
+          <span className="text-sm font-medium text-red-400">
             {formatTime(recordingTime)}
           </span>
-          <Loader2 className="h-3 w-3 animate-spin text-destructive" />
+          <Loader2 className="h-4 w-4 animate-spin text-red-400" />
         </div>
       )}
     </div>
