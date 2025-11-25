@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, Square, Loader2, X, RotateCcw } from "lucide-react";
+import { Mic, Square, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { AudioPlayer } from "./AudioPlayer";
 
 interface AudioRecorderProps {
   onAudioRecorded: (audioBlob: Blob | null) => void;
@@ -12,7 +11,6 @@ interface AudioRecorderProps {
 export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [recordedAudio, setRecordedAudio] = useState<{ blob: Blob; url: string } | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<number>();
@@ -53,10 +51,8 @@ export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps)
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(chunksRef.current, { type: mimeType });
-        const audioUrl = URL.createObjectURL(audioBlob);
         console.log('Audio recorded:', { size: audioBlob.size, type: audioBlob.type });
         
-        setRecordedAudio({ blob: audioBlob, url: audioUrl });
         onAudioRecorded(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };
@@ -94,65 +90,6 @@ export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps)
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
-  const handleRerecord = () => {
-    if (recordedAudio) {
-      URL.revokeObjectURL(recordedAudio.url);
-      setRecordedAudio(null);
-      onAudioRecorded(null);
-    }
-    startRecording();
-  };
-
-  const handleRemove = () => {
-    if (recordedAudio) {
-      URL.revokeObjectURL(recordedAudio.url);
-      setRecordedAudio(null);
-      onAudioRecorded(null);
-    }
-  };
-
-  // Cleanup URL on unmount
-  useEffect(() => {
-    return () => {
-      if (recordedAudio) {
-        URL.revokeObjectURL(recordedAudio.url);
-      }
-    };
-  }, [recordedAudio]);
-
-  // Show preview if audio is recorded
-  if (recordedAudio) {
-    return (
-      <div className="flex items-center gap-2 w-full">
-        <div className="flex-1 min-w-0">
-          <AudioPlayer audioUrl={recordedAudio.url} isOwn={true} />
-        </div>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          onClick={handleRerecord}
-          disabled={disabled}
-          className="h-9 w-9 flex-shrink-0"
-          title="Regravar"
-        >
-          <RotateCcw className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          onClick={handleRemove}
-          disabled={disabled}
-          className="h-9 w-9 flex-shrink-0"
-          title="Remover"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div className="flex items-center gap-2">
