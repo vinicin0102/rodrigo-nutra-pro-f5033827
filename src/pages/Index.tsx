@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, MessageCircle, Bookmark, MoreHorizontal, Image as ImageIcon, X } from "lucide-react";
+import { Heart, MoreHorizontal, Image as ImageIcon, X, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -12,6 +12,8 @@ import { PostReactions } from "@/components/feed/PostReactions";
 import { PostComments } from "@/components/feed/PostComments";
 import { DiamondAnimation } from "@/components/DiamondAnimation";
 import { FollowButton } from "@/components/FollowButton";
+import { Notifications } from "@/components/Notifications";
+import { cn } from "@/lib/utils";
 
 interface Post {
   id: string;
@@ -31,7 +33,7 @@ interface Post {
 }
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [feedFilter, setFeedFilter] = useState<"all" | "following">("all");
   const [newPost, setNewPost] = useState("");
@@ -190,6 +192,48 @@ const Index = () => {
     }
   };
 
+  const handleLike = async (postId: string) => {
+    if (!user) {
+      toast.error("Faça login para curtir posts");
+      return;
+    }
+
+    try {
+      const post = posts.find(p => p.id === postId);
+      const hasLiked = post?.user_reactions?.includes("❤️");
+
+      if (hasLiked) {
+        // Remove like
+        await supabase
+          .from("post_reactions")
+          .delete()
+          .eq("post_id", postId)
+          .eq("user_id", user.id)
+          .eq("reaction", "❤️");
+      } else {
+        // Add like
+        await supabase
+          .from("post_reactions")
+          .insert({
+            post_id: postId,
+            user_id: user.id,
+            reaction: "❤️"
+          });
+      }
+
+      // Refresh posts
+      fetchPosts();
+    } catch (error) {
+      console.error("Error liking post:", error);
+      toast.error("Erro ao curtir post");
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    toast.success("Você saiu da conta");
+  };
+
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -216,7 +260,7 @@ const Index = () => {
       <header className="fixed top-0 md:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gradient-fire">NutraHub</h1>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-2">
             <Button 
               variant="ghost" 
               size="icon"
@@ -224,8 +268,9 @@ const Index = () => {
             >
               <Heart className="w-6 h-6" />
             </Button>
-            <Button variant="ghost" size="icon">
-              <MessageCircle className="w-6 h-6" />
+            <Notifications />
+            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <LogOut className="w-6 h-6" />
             </Button>
           </div>
         </div>
@@ -359,8 +404,16 @@ const Index = () => {
                       userReactions={post.user_reactions}
                     />
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Bookmark className="w-5 h-5" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => handleLike(post.id)}
+                  >
+                    <Heart className={cn(
+                      "w-5 h-5 transition-all",
+                      post.user_reactions?.includes("❤️") && "fill-red-500 text-red-500"
+                    )} />
                   </Button>
                 </div>
 
