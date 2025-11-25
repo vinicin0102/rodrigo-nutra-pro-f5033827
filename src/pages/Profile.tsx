@@ -7,10 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { Camera, Save, Trophy, Medal, Award, Flame, Edit2, X, Check } from "lucide-react";
+import { Camera, Save, Trophy, Medal, Award, Flame, Edit2, X, Check, Crown, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 interface ProfileData {
@@ -33,6 +34,7 @@ interface UserAward {
 
 const Profile = () => {
   const { user } = useAuth();
+  const { subscription, isPremium, loading: subscriptionLoading } = useSubscription();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [awards, setAwards] = useState<UserAward[]>([]);
   const [loading, setLoading] = useState(true);
@@ -386,6 +388,62 @@ const Profile = () => {
                 {profile.bio || "Nenhuma biografia adicionada ainda. Clique em Editar para adicionar uma!"}
               </p>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Plan Section */}
+        <Card className="border-2 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-primary" />
+              Meu Plano
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div className="flex-1 space-y-2">
+                <Badge variant={isPremium ? "default" : "secondary"} className="mb-2">
+                  {isPremium ? (
+                    <><Crown className="w-3 h-3 mr-1" /> Premium</>
+                  ) : (
+                    "Gratuito"
+                  )}
+                </Badge>
+                <div className="space-y-1">
+                  {isPremium ? (
+                    <>
+                      <p className="text-sm font-medium flex items-center gap-1">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        Acesso completo a todas as funcionalidades
+                      </p>
+                      <ul className="text-sm text-muted-foreground space-y-1 pl-5 list-disc">
+                        <li>Assistentes de IA (Copy e Criativo)</li>
+                        <li>Publicações ilimitadas</li>
+                        <li>Suporte prioritário</li>
+                        <li>Acesso a desafios e recompensas</li>
+                      </ul>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium">Acesso às publicações e suporte</p>
+                      <ul className="text-sm text-muted-foreground space-y-1 pl-5 list-disc">
+                        <li>Publicações e feed da comunidade</li>
+                        <li>Suporte básico</li>
+                      </ul>
+                      <p className="text-sm text-muted-foreground mt-3">
+                        ⚠️ Assistentes de IA disponíveis apenas no plano Premium
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              {!isPremium && (
+                <Button className="gradient-fire w-full md:w-auto">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Fazer Upgrade para Premium
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
 
