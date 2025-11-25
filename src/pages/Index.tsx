@@ -42,6 +42,7 @@ const Index = () => {
   const [showDiamondAnimation, setShowDiamondAnimation] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
+  const [animatingPostId, setAnimatingPostId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -201,6 +202,11 @@ const Index = () => {
     try {
       const post = posts.find(p => p.id === postId);
       const hasLiked = post?.user_reactions?.includes("❤️");
+
+      if (!hasLiked) {
+        setAnimatingPostId(postId);
+        setTimeout(() => setAnimatingPostId(null), 300);
+      }
 
       if (hasLiked) {
         // Remove like
@@ -404,25 +410,24 @@ const Index = () => {
                       userReactions={post.user_reactions}
                     />
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8"
-                    onClick={() => handleLike(post.id)}
-                  >
-                    <Heart className={cn(
-                      "w-5 h-5 transition-all",
-                      post.user_reactions?.includes("❤️") && "fill-red-500 text-red-500"
-                    )} />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={() => handleLike(post.id)}
+                    >
+                      <Heart className={cn(
+                        "w-5 h-5 transition-all",
+                        post.user_reactions?.includes("❤️") && "fill-red-500 text-red-500",
+                        animatingPostId === post.id && "animate-heart-beat"
+                      )} />
+                    </Button>
+                    {likesCount > 0 && (
+                      <span className="text-sm font-semibold text-foreground">{likesCount}</span>
+                    )}
+                  </div>
                 </div>
-
-                {/* Curtidas */}
-                {likesCount > 0 && (
-                  <p className="px-4 pb-2 text-sm font-semibold">
-                    {likesCount} {likesCount === 1 ? 'curtida' : 'curtidas'}
-                  </p>
-                )}
 
                 {/* Legenda */}
                 {post.content && (
