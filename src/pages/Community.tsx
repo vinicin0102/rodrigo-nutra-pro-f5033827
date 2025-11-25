@@ -322,7 +322,7 @@ const Community = () => {
             {/* Messages Area */}
             <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#0A0A0A' }}>
               <ScrollArea className="h-full overscroll-contain">
-              <div ref={scrollRef} className="p-4 space-y-4">
+              <div ref={scrollRef} className="p-4 space-y-3">
                 {loading ? (
                   <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
                     Carregando mensagens...
@@ -345,31 +345,31 @@ const Community = () => {
                     return (
                       <div
                         key={message.id}
-                        className="flex gap-3 items-start"
+                        className="flex gap-2 items-start"
                       >
                         {showAvatar ? (
-                          <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-white/10">
+                          <Avatar className="w-8 h-8 flex-shrink-0 ring-2 ring-white/10">
                             <AvatarImage src={message.profiles?.avatar_url || ''} />
                             <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
                         ) : (
-                          <div className="w-11 flex-shrink-0" />
+                          <div className="w-8 flex-shrink-0" />
                         )}
                         
                         <div className="flex-1 min-w-0">
                           {showAvatar && (
-                            <div className="flex items-baseline gap-2 mb-2">
-                              <span className="text-base font-bold" style={{ color: userColor }}>
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="text-sm font-semibold" style={{ color: userColor }}>
                                 {username}
                               </span>
                             </div>
                           )}
                           
-                          <div className="rounded-xl px-4 py-3 max-w-lg" style={{ backgroundColor: '#1F1F1F' }}>
+                          <div className="rounded-xl px-3 py-2 max-w-lg" style={{ backgroundColor: '#1F1F1F' }}>
                             {message.content && (
-                              <p className="text-sm text-gray-100 leading-relaxed">{message.content}</p>
+                              <p className="text-xs text-gray-100 leading-relaxed">{message.content}</p>
                             )}
                             {message.image_url && (
                               <img 
@@ -388,7 +388,7 @@ const Community = () => {
                             )}
                           </div>
                           
-                          <span className="text-xs text-gray-500 mt-2 inline-block">
+                          <span className="text-[10px] text-gray-500 mt-1 inline-block">
                             {formatTime(message.created_at)}
                           </span>
                         </div>
