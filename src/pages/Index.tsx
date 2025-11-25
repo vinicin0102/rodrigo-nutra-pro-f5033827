@@ -12,6 +12,7 @@ import { PostReactions } from "@/components/feed/PostReactions";
 import { PostComments } from "@/components/feed/PostComments";
 import { DiamondAnimation } from "@/components/DiamondAnimation";
 import { FollowButton } from "@/components/FollowButton";
+import { BadgeIcon } from "@/components/BadgeIcon";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +33,7 @@ interface Post {
   user_reactions?: string[];
   comments_count?: number;
   user_points?: number;
-  user_badges?: Array<{ badge_icon: string; badge_name: string }>;
+  user_badges?: Array<{ badge_icon: string; badge_name: string; badge_type: string }>;
 }
 
 const Index = () => {
@@ -95,7 +96,7 @@ const Index = () => {
               .eq("post_id", post.id),
             supabase
               .from("user_badges")
-              .select("badge_icon, badge_name")
+              .select("badge_icon, badge_name, badge_type")
               .eq("user_id", post.user_id)
           ]);
 
@@ -403,9 +404,13 @@ const Index = () => {
                       </div>
                       <div className="flex items-center gap-1 mt-0.5">
                         {(post.user_badges || []).slice(0, 5).map((badge, idx) => (
-                          <span key={idx} title={badge.badge_name} className="text-xs">
-                            {badge.badge_icon}
-                          </span>
+                          <BadgeIcon 
+                            key={idx} 
+                            type={badge.badge_type} 
+                            name={badge.badge_name} 
+                            size={16}
+                            animationDelay={idx * 100}
+                          />
                         ))}
                       </div>
                     </div>
