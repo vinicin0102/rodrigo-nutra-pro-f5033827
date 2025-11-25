@@ -149,7 +149,7 @@ const Community = () => {
     setTypingTimeout(timeout);
   };
 
-  const handleAudioRecorded = async (audioBlob: Blob) => {
+  const handleAudioRecorded = async (audioBlob: Blob | null) => {
     setPendingAudio(audioBlob);
   };
 
