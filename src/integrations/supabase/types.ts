@@ -86,6 +86,42 @@ export type Database = {
         }
         Relationships: []
       }
+      followers: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "followers_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "followers_following_id_fkey"
+            columns: ["following_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -264,6 +300,8 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          followers_count: number
+          following_count: number
           id: string
           points: number
           total_sales: number
@@ -273,6 +311,8 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          followers_count?: number
+          following_count?: number
           id: string
           points?: number
           total_sales?: number
@@ -282,6 +322,8 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          followers_count?: number
+          following_count?: number
           id?: string
           points?: number
           total_sales?: number
@@ -428,6 +470,8 @@ export type Database = {
         }
         Returns: string
       }
+      get_followers_count: { Args: { user_id: string }; Returns: number }
+      get_following_count: { Args: { user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
