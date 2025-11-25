@@ -3,8 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Heart, MoreHorizontal, Image as ImageIcon, X, LogOut } from "lucide-react";
+import { Heart, MoreHorizontal, Image as ImageIcon, X, Send, User, Trophy, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -12,8 +11,9 @@ import { PostReactions } from "@/components/feed/PostReactions";
 import { PostComments } from "@/components/feed/PostComments";
 import { DiamondAnimation } from "@/components/DiamondAnimation";
 import { FollowButton } from "@/components/FollowButton";
-import { Notifications } from "@/components/Notifications";
 import { cn } from "@/lib/utils";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 
 interface Post {
   id: string;
@@ -34,8 +34,8 @@ interface Post {
 
 const Index = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
-  const [feedFilter, setFeedFilter] = useState<"all" | "following">("all");
   const [newPost, setNewPost] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
@@ -43,38 +43,34 @@ const Index = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [earnedPoints, setEarnedPoints] = useState(0);
   const [animatingPostId, setAnimatingPostId] = useState<string | null>(null);
+  const [userProfile, setUserProfile] = useState<{ avatar_url: string | null; username: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchPosts();
-  }, [feedFilter, user]);
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from("profiles")
+      .select("avatar_url, username")
+      .eq("id", user.id)
+      .single();
+    
+    if (data) setUserProfile(data);
+  };
 
   const fetchPosts = async () => {
     try {
-      let query = supabase
+      const { data: postsData, error: postsError } = await supabase
         .from("posts")
         .select("*, post_likes (user_id)")
         .order("created_at", { ascending: false });
-
-      // Se filtro for "following", buscar apenas posts de pessoas seguidas
-      if (feedFilter === "following" && user) {
-        // Primeiro, buscar IDs das pessoas que o usuário segue
-        const { data: followingData } = await supabase
-          .from("followers")
-          .select("following_id")
-          .eq("follower_id", user.id);
-
-        if (followingData && followingData.length > 0) {
-          const followingIds = followingData.map(f => f.following_id);
-          query = query.in("user_id", followingIds);
-        } else {
-          // Se não segue ninguém, não mostrar posts
-          setPosts([]);
-          return;
-        }
-      }
-
-      const { data: postsData, error: postsError } = await query;
 
       if (postsError) throw postsError;
 
@@ -262,37 +258,51 @@ const Index = () => {
         />
       )}
       
-      {/* Header estilo Instagram */}
+      {/* Header com Avatar de Perfil */}
       <header className="fixed top-0 md:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gradient-fire">NutraHub</h1>
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={() => setShowCreatePost(!showCreatePost)}
-            >
-              <Heart className="w-6 h-6" />
-            </Button>
-            <Notifications />
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="w-6 h-6" />
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-primary/50 hover:ring-primary transition-all">
+                <AvatarImage src={userProfile?.avatar_url || undefined} />
+                <AvatarFallback className="bg-gradient-fire text-white text-xs">
+                  {(userProfile?.username || "U").substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => navigate('/profile')}>
+                <User className="w-4 h-4 mr-2" /> Editar Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/ranking')}>
+                <Trophy className="w-4 h-4 mr-2" /> Meu Ranking
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" /> Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Filtro do Feed */}
-        <div className="max-w-2xl mx-auto px-4 pb-2">
-          <Tabs value={feedFilter} onValueChange={(v) => setFeedFilter(v as "all" | "following")}>
-            <TabsList className="w-full grid grid-cols-2">
-              <TabsTrigger value="all">Para Você</TabsTrigger>
-              <TabsTrigger value="following">Seguindo</TabsTrigger>
-            </TabsList>
-          </Tabs>
+        {/* Barra Motivacional */}
+        <div className="max-w-2xl mx-auto bg-gradient-to-r from-primary/10 to-accent/10 px-4 py-3 flex items-center gap-3">
+          <Button 
+            size="icon" 
+            variant="ghost"
+            onClick={() => setShowCreatePost(!showCreatePost)}
+            className="flex-shrink-0"
+          >
+            <Send className="w-5 h-5 text-primary" />
+          </Button>
+          <p className="text-sm text-muted-foreground flex-1">
+            Faça postagens de seus resultados e ganhe pontos para resgatar prêmios 🎁
+          </p>
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto pt-28 md:pt-36">
+      <div className="max-w-2xl mx-auto pt-32 md:pt-40">
         {/* Criar Post - Expandível */}
         {showCreatePost && (
           <div className="bg-background border-b border-border p-4 space-y-3">
@@ -451,10 +461,7 @@ const Index = () => {
           {posts.length === 0 && (
             <div className="text-center py-20 px-4">
               <p className="text-muted-foreground">
-                {feedFilter === "following" 
-                  ? "Você ainda não segue ninguém. Explore o feed 'Para Você' e comece a seguir pessoas! 👥"
-                  : "Seja o primeiro a compartilhar! 🚀"
-                }
+                Seja o primeiro a compartilhar! 🚀
               </p>
             </div>
           )}

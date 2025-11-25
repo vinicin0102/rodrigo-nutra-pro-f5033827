@@ -1,4 +1,4 @@
-import { Home, Users, Trophy, Gift, Sparkles, MessageCircle, LogOut, User } from "lucide-react";
+import { Home, Users, Trophy, Gift, Sparkles, MessageCircle, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Notifications } from "./Notifications";
+import { AIPopup } from "./AIPopup";
+import { useState } from "react";
 
 interface NavItemProps {
   to: string;
@@ -37,6 +39,7 @@ const NavItem = ({ to, icon: Icon, children, mobile }: NavItemProps) => {
 
 export const Navigation = () => {
   const { signOut, isDiamond } = useAuth();
+  const [showAIPopup, setShowAIPopup] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,7 +59,6 @@ export const Navigation = () => {
                 <NavItem to="/community" icon={Users}>Comunidade</NavItem>
                 <NavItem to="/ranking" icon={Trophy}>Ranking</NavItem>
                 <NavItem to="/rewards" icon={Gift}>Prêmios</NavItem>
-                <NavItem to="/profile" icon={User}>Perfil</NavItem>
                 {isDiamond && (
                   <>
                     <NavItem to="/ai-copy" icon={Sparkles}>IA Copy</NavItem>
@@ -79,13 +81,24 @@ export const Navigation = () => {
 
       {/* Mobile Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-        <div className="grid grid-cols-4 gap-1 p-2">
+        <div className="flex items-center justify-around p-2 relative">
           <NavItem to="/" icon={Home} mobile>Início</NavItem>
+          <NavItem to="/rewards" icon={Gift} mobile>Prêmios</NavItem>
+          
+          {/* Botão FAB laranja - IA */}
+          <Button 
+            onClick={() => setShowAIPopup(true)}
+            className="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all"
+          >
+            <Sparkles className="w-6 h-6 text-white" />
+          </Button>
+          
           <NavItem to="/community" icon={Users} mobile>Comunidade</NavItem>
-          <NavItem to="/profile" icon={User} mobile>Perfil</NavItem>
-          <NavItem to="/support" icon={MessageCircle} mobile>Suporte</NavItem>
+          <NavItem to="/ranking" icon={Trophy} mobile>Ranking</NavItem>
         </div>
       </nav>
+
+      <AIPopup open={showAIPopup} onOpenChange={setShowAIPopup} />
     </>
   );
 };
