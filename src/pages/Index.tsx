@@ -351,7 +351,7 @@ const Index = () => {
         {/* Feed de Posts - Estilo Instagram */}
         <div className="space-y-0">
           {posts.map((post) => {
-            const likesCount = Object.values(post.reactions || {}).reduce((a, b) => a + b, 0);
+            const heartLikesCount = post.reactions?.["❤️"] || 0;
             
             return (
               <article key={post.id} className="bg-background border-b border-border">
@@ -423,8 +423,8 @@ const Index = () => {
                         animatingPostId === post.id && "animate-heart-beat"
                       )} />
                     </Button>
-                    {likesCount > 0 && (
-                      <span className="text-sm font-semibold text-foreground">{likesCount}</span>
+                    {heartLikesCount > 0 && (
+                      <span className="text-sm font-semibold text-foreground">{heartLikesCount}</span>
                     )}
                   </div>
                 </div>
