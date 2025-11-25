@@ -384,7 +384,7 @@ const Index = () => {
             return (
               <article key={post.id} className="bg-background border-b border-border">
                 {/* Header do Post */}
-                <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center px-4 py-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="relative flex-shrink-0">
                       <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 rounded-full blur-sm"></div>
@@ -414,12 +414,6 @@ const Index = () => {
                         ))}
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <FollowButton userId={post.user_id} variant="ghost" size="sm" showIcon={false} />
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="w-5 h-5" />
-                    </Button>
                   </div>
                 </div>
 
