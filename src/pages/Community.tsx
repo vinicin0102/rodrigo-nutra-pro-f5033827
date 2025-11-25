@@ -15,6 +15,7 @@ import { EmojiPicker } from "@/components/community/EmojiPicker";
 import { TypingIndicator } from "@/components/community/TypingIndicator";
 import { OnlineMembers } from "@/components/community/OnlineMembers";
 import { AudioPlayer } from "@/components/community/AudioPlayer";
+import { RotateCcw } from "lucide-react";
 
 interface Message {
   id: string;
@@ -35,6 +36,7 @@ const Community = () => {
   const [loading, setLoading] = useState(true);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
+  const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -150,7 +152,26 @@ const Community = () => {
   };
 
   const handleAudioRecorded = async (audioBlob: Blob | null) => {
+    // Limpar URL anterior se existir
+    if (pendingAudioUrl) {
+      URL.revokeObjectURL(pendingAudioUrl);
+    }
+    
     setPendingAudio(audioBlob);
+    if (audioBlob) {
+      setPendingAudioUrl(URL.createObjectURL(audioBlob));
+    } else {
+      setPendingAudioUrl(null);
+    }
+  };
+
+  const handleRerecordAudio = () => {
+    if (pendingAudioUrl) {
+      URL.revokeObjectURL(pendingAudioUrl);
+    }
+    setPendingAudio(null);
+    setPendingAudioUrl(null);
+    // O AudioRecorder vai iniciar uma nova gravação automaticamente
   };
 
   const uploadAudio = async (audioBlob: Blob): Promise<string> => {
@@ -225,6 +246,10 @@ const Community = () => {
       setNewMessage("");
       setPendingImage(null);
       setPendingAudio(null);
+      if (pendingAudioUrl) {
+        URL.revokeObjectURL(pendingAudioUrl);
+        setPendingAudioUrl(null);
+      }
 
       // Clear typing indicator
       await supabase
@@ -377,18 +402,36 @@ const Community = () => {
                     </Button>
                   </div>
                 )}
-                {pendingAudio && (
-                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg">
-                    <Play className="h-4 w-4" />
-                    <span className="text-sm">Áudio gravado</span>
+                {pendingAudio && pendingAudioUrl && (
+                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg flex-1">
+                    <div className="flex-1 min-w-0">
+                      <AudioPlayer audioUrl={pendingAudioUrl} isOwn={true} />
+                    </div>
                     <Button
                       type="button"
                       size="icon"
                       variant="ghost"
-                      className="h-6 w-6"
-                      onClick={() => setPendingAudio(null)}
+                      className="h-8 w-8 flex-shrink-0"
+                      onClick={handleRerecordAudio}
+                      title="Regravar"
                     >
-                      <X className="h-3 w-3" />
+                      <RotateCcw className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 flex-shrink-0"
+                      onClick={() => {
+                        if (pendingAudioUrl) {
+                          URL.revokeObjectURL(pendingAudioUrl);
+                        }
+                        setPendingAudio(null);
+                        setPendingAudioUrl(null);
+                      }}
+                      title="Remover"
+                    >
+                      <X className="h-4 w-4" />
                     </Button>
                   </div>
                 )}
