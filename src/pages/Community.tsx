@@ -306,7 +306,7 @@ const Community = () => {
     <div className="h-screen overflow-hidden flex flex-col md:pt-16" style={{ backgroundColor: '#0A0A0A' }}>
       <Navigation />
       
-      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-24 md:pb-8">
+      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-32 md:pb-8">
         <div className="max-w-4xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
           {/* Main Chat */}
           <div className="flex-1 flex flex-col min-w-0 min-h-0">
@@ -322,7 +322,7 @@ const Community = () => {
             {/* Messages Area */}
             <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#0A0A0A' }}>
               <ScrollArea className="h-full overscroll-contain">
-              <div ref={scrollRef} className="p-6 space-y-5">
+              <div ref={scrollRef} className="p-4 space-y-4">
                 {loading ? (
                   <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
                     Carregando mensagens...
@@ -345,7 +345,7 @@ const Community = () => {
                     return (
                       <div
                         key={message.id}
-                        className="flex gap-3 items-start mb-3"
+                        className="flex gap-3 items-start"
                       >
                         {showAvatar ? (
                           <Avatar className="w-11 h-11 flex-shrink-0 ring-2 ring-white/10">
@@ -404,87 +404,30 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 rounded-lg p-4 space-y-3"
+              className="flex-shrink-0 rounded-lg p-4 min-h-[120px] flex flex-col justify-end space-y-3"
               style={{ backgroundColor: '#1F1F1F' }}
             >
             {/* Preview attachments */}
-            {(pendingImage || pendingAudio) && (
-              <div className="mb-2 flex gap-2">
-                {pendingImage && (
-                  <div className="relative">
-                    <img 
-                      src={pendingImage} 
-                      alt="Preview" 
-                      className="h-20 w-20 object-cover rounded-lg"
-                    />
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="destructive"
-                      className="absolute -top-2 -right-2 h-6 w-6"
-                      onClick={() => setPendingImage(null)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                )}
-                {pendingAudio && pendingAudioUrl && (
-                  <div className="flex items-center gap-2 px-4 py-3 rounded-lg border border-gray-700" style={{ backgroundColor: '#0A0A0A' }}>
-                    <div className="flex-1 min-w-0 max-w-[200px]">
-                      <AudioPlayer audioUrl={pendingAudioUrl} isOwn={true} />
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white hover:bg-gray-800"
-                      onClick={handleRerecordAudio}
-                      title="Regravar"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 flex-shrink-0 text-gray-400 hover:text-white hover:bg-gray-800"
-                      onClick={() => {
-                        if (pendingAudioUrl) {
-                          URL.revokeObjectURL(pendingAudioUrl);
-                        }
-                        setPendingAudio(null);
-                        setPendingAudioUrl(null);
-                      }}
-                      title="Remover"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="flex gap-3 items-center">
-              <div className="flex-shrink-0">
-                <MediaUpload 
-                  onImageSelected={setPendingImage}
-                  disabled={!!pendingImage}
-                />
-              </div>
+...
+            {/* Botões de mídia */}
+            <div className="flex gap-2 mb-2">
+              <MediaUpload 
+                onImageSelected={setPendingImage}
+                disabled={!!pendingImage}
+              />
               
-              <div className="flex-shrink-0">
-                <AudioRecorder 
-                  onAudioRecorded={handleAudioRecorded}
-                  disabled={!!pendingAudio}
-                />
-              </div>
+              <AudioRecorder 
+                onAudioRecorded={handleAudioRecorded}
+                disabled={!!pendingAudio}
+              />
               
-              <div className="flex-shrink-0">
-                <EmojiPicker 
-                  onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
-                />
-              </div>
-              
+              <EmojiPicker 
+                onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
+              />
+            </div>
+            
+            {/* Input + Enviar */}
+            <div className="flex gap-2 items-end">
               <Input
                 value={newMessage}
                 onChange={(e) => {
@@ -498,18 +441,19 @@ const Community = () => {
                   }
                 }}
                 placeholder="Digite sua mensagem..."
-                className="flex-1 h-11 bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                className="flex-1 h-12 text-base bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                style={{ backgroundColor: '#0A0A0A' }}
                 autoFocus
               />
               
               <Button 
                 type="submit"
                 disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
-                className="h-11 w-11 flex-shrink-0 rounded-full bg-gradient-to-br from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700"
+                className="h-12 w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
               >
                 <Send className="w-5 h-5" />
               </Button>
-              </div>
+            </div>
             </form>
           </div>
         </div>

@@ -81,20 +81,19 @@ export const Navigation = () => {
 
       {/* Mobile Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
-        <div className="flex items-center justify-around p-2 relative">
+        <div className="flex items-center justify-around p-2">
           <NavItem to="/" icon={Home} mobile>Início</NavItem>
           <NavItem to="/rewards" icon={Gift} mobile>Prêmios</NavItem>
-          
-          {/* Botão FAB laranja - IA */}
-          <Button 
-            onClick={() => setShowAIPopup(true)}
-            className="absolute -top-6 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all"
-          >
-            <Sparkles className="w-6 h-6 text-white" />
-          </Button>
-          
           <NavItem to="/community" icon={Users} mobile>Comunidade</NavItem>
           <NavItem to="/ranking" icon={Trophy} mobile>Ranking</NavItem>
+          
+          {/* Botão FAB laranja - IA (à direita) */}
+          <Button 
+            onClick={() => setShowAIPopup(true)}
+            className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
+          >
+            <Sparkles className="w-5 h-5 text-white" />
+          </Button>
         </div>
       </nav>
 
