@@ -25,7 +25,7 @@ export const EmojiPicker = ({ onEmojiSelect, disabled }: EmojiPickerProps) => {
           size="icon"
           variant="ghost"
           disabled={disabled}
-          className="h-11 w-11 bg-gradient-to-br from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white disabled:opacity-50"
+          className="h-10 w-10 bg-yellow-500/20 border border-yellow-500/50 hover:bg-yellow-500/30 text-yellow-400 disabled:opacity-50"
           title="Adicionar emoji"
         >
           <Smile className="h-5 w-5" />

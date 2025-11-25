@@ -89,7 +89,7 @@ export const MediaUpload = ({ onImageSelected, disabled }: MediaUploadProps) => 
         variant="ghost"
         onClick={() => fileInputRef.current?.click()}
         disabled={disabled}
-        className="h-11 w-11 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white disabled:opacity-50"
+        className="h-10 w-10 bg-blue-500/20 border border-blue-500/50 hover:bg-blue-500/30 text-blue-400 disabled:opacity-50"
         title="Enviar imagem"
       >
         <Image className="h-5 w-5" />
