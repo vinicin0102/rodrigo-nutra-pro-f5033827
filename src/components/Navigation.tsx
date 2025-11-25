@@ -91,6 +91,7 @@ export const Navigation = () => {
           <NavItem to="/rewards" icon={Gift} mobile>Prêmios</NavItem>
           <NavItem to="/community" icon={Users} mobile>Comunidade</NavItem>
           <NavItem to="/ranking" icon={Trophy} mobile>Ranking</NavItem>
+          <NavItem to="/support" icon={MessageCircle} mobile>Suporte</NavItem>
           
           {/* Botão FAB laranja - IA (à direita) */}
           <Button 
