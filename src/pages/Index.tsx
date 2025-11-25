@@ -202,7 +202,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-8 md:pt-16">
+    <div className="min-h-screen bg-background pb-20 md:pb-8">
       <Navigation />
       
       {showDiamondAnimation && (
@@ -213,7 +213,7 @@ const Index = () => {
       )}
       
       {/* Header estilo Instagram */}
-      <header className="fixed top-16 md:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
+      <header className="fixed top-0 md:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gradient-fire">NutraHub</h1>
           <div className="flex gap-4">
@@ -241,7 +241,7 @@ const Index = () => {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto pt-36 md:pt-36">
+      <div className="max-w-2xl mx-auto pt-28 md:pt-36">
         {/* Criar Post - Expandível */}
         {showCreatePost && (
           <div className="bg-background border-b border-border p-4 space-y-3">
