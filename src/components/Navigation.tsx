@@ -70,6 +70,11 @@ export const Navigation = () => {
             </div>
             <div className="flex items-center gap-2">
               <Notifications />
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/support">
+                  <MessageCircle className="w-5 h-5" />
+                </Link>
+              </Button>
               <Button variant="ghost" size="sm" onClick={handleSignOut}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sair
