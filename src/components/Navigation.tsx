@@ -1,4 +1,4 @@
-import { Home, Users, Trophy, Gift, Sparkles, MessageCircle, LogOut, User } from "lucide-react";
+import { Home, Users, Trophy, Gift, Sparkles, MessageCircle, LogOut, User, Target } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
@@ -55,6 +55,7 @@ export const Navigation = () => {
                 <NavItem to="/" icon={Home}>Início</NavItem>
                 <NavItem to="/community" icon={Users}>Comunidade</NavItem>
                 <NavItem to="/ranking" icon={Trophy}>Ranking</NavItem>
+                <NavItem to="/challenges" icon={Target}>Desafios</NavItem>
                 <NavItem to="/rewards" icon={Gift}>Prêmios</NavItem>
                 <NavItem to="/profile" icon={User}>Perfil</NavItem>
                 {isDiamond && (
@@ -82,7 +83,7 @@ export const Navigation = () => {
         <div className="grid grid-cols-5 gap-1 p-2">
           <NavItem to="/" icon={Home} mobile>Início</NavItem>
           <NavItem to="/community" icon={Users} mobile>Comunidade</NavItem>
-          <NavItem to="/ranking" icon={Trophy} mobile>Ranking</NavItem>
+          <NavItem to="/challenges" icon={Target} mobile>Desafios</NavItem>
           <NavItem to="/profile" icon={User} mobile>Perfil</NavItem>
           <NavItem to="/support" icon={MessageCircle} mobile>Suporte</NavItem>
         </div>

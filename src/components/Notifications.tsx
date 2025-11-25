@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell, Check, Gem, Heart, MessageCircle, Sparkles } from "lucide-react";
+import { Bell, Check, Gem, Heart, MessageCircle, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -132,6 +132,8 @@ export const Notifications = () => {
       navigate('/');
     } else if (notification.type === 'message') {
       navigate('/community');
+    } else if (notification.type === 'challenge') {
+      navigate('/challenges');
     }
     
     setIsOpen(false);
@@ -149,6 +151,8 @@ export const Notifications = () => {
         return <Sparkles className="w-4 h-4 text-purple-500" />;
       case 'message':
         return <MessageCircle className="w-4 h-4 text-green-500" />;
+      case 'challenge':
+        return <Trophy className="w-4 h-4 text-yellow-500" />;
       default:
         return <Bell className="w-4 h-4" />;
     }
