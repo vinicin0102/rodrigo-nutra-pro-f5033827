@@ -102,6 +102,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
   );
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const isBlobUrl = audioUrl.startsWith('blob:');
 
   if (error) {
     return (
@@ -121,7 +122,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
         ref={audioRef} 
         src={audioUrl} 
         preload="metadata"
-        crossOrigin="anonymous"
+        {...(!isBlobUrl && { crossOrigin: "anonymous" })}
       />
       
       {/* Play/Pause Button */}

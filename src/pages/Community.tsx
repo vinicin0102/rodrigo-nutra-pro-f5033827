@@ -178,11 +178,24 @@ const Community = () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    const fileName = `${user.id}/${Date.now()}.webm`;
+    // Detectar extensão correta baseada no tipo MIME
+    const getExtension = (mimeType: string): string => {
+      if (mimeType.includes('mp4')) return 'mp4';
+      if (mimeType.includes('aac')) return 'aac';
+      if (mimeType.includes('ogg')) return 'ogg';
+      if (mimeType.includes('webm')) return 'webm';
+      if (mimeType.includes('wav')) return 'wav';
+      return 'webm'; // fallback
+    };
+
+    const extension = getExtension(audioBlob.type);
+    const fileName = `${user.id}/${Date.now()}.${extension}`;
     
     const { error: uploadError, data } = await supabase.storage
       .from('community-media')
-      .upload(fileName, audioBlob);
+      .upload(fileName, audioBlob, {
+        contentType: audioBlob.type
+      });
 
     if (uploadError) throw uploadError;
 
@@ -403,8 +416,8 @@ const Community = () => {
                   </div>
                 )}
                 {pendingAudio && pendingAudioUrl && (
-                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg flex-1">
-                    <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 bg-muted px-3 py-2 rounded-lg max-h-14">
+                    <div className="flex-1 min-w-0 max-w-[200px]">
                       <AudioPlayer audioUrl={pendingAudioUrl} isOwn={true} />
                     </div>
                     <Button
