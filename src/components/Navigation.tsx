@@ -71,6 +71,29 @@ export const Navigation = () => {
 
   return (
     <>
+      {/* Mobile Header */}
+      <nav className="md:hidden fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border z-50">
+        <div className="flex items-center justify-between px-4 h-14">
+          <h2 className="text-lg font-bold text-gradient-fire">NutraHub Elite</h2>
+          <div className="flex items-center gap-2">
+            <Notifications />
+            <Button variant="ghost" size="icon" asChild>
+              <Link to="/support">
+                <MessageCircle className="w-5 h-5" />
+              </Link>
+            </Button>
+            <Link to="/profile">
+              <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-primary/20">
+                <AvatarImage src={profile?.avatar_url || ''} />
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                  {userInitials}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Desktop Navigation */}
       <nav className="hidden md:block fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-md border-b border-border z-50">
         <div className="max-w-6xl mx-auto px-4">
@@ -110,16 +133,15 @@ export const Navigation = () => {
         </div>
       </nav>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border z-50">
         <div className="flex items-center justify-around p-2">
           <NavItem to="/" icon={Home} mobile>Início</NavItem>
           <NavItem to="/rewards" icon={Gift} mobile>Prêmios</NavItem>
           <NavItem to="/community" icon={Users} mobile>Comunidade</NavItem>
           <NavItem to="/ranking" icon={Trophy} mobile>Ranking</NavItem>
-          <NavItem to="/support" icon={MessageCircle} mobile>Suporte</NavItem>
           
-          {/* Botão FAB laranja - IA (à direita) */}
+          {/* Botão FAB laranja - IA */}
           <Button 
             onClick={() => setShowAIPopup(true)}
             className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg hover:shadow-xl transition-all flex items-center justify-center"
