@@ -2,12 +2,14 @@ import { Home, Users, Trophy, Gift, Sparkles, MessageCircle, LogOut } from "luci
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 import { Notifications } from "./Notifications";
 import { AIPopup } from "./AIPopup";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface NavItemProps {
   to: string;
@@ -38,13 +40,34 @@ const NavItem = ({ to, icon: Icon, children, mobile }: NavItemProps) => {
 };
 
 export const Navigation = () => {
-  const { signOut, isDiamond } = useAuth();
+  const { signOut, isDiamond, user } = useAuth();
   const [showAIPopup, setShowAIPopup] = useState(false);
+  const [profile, setProfile] = useState<{ username: string; avatar_url: string | null } | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from("profiles")
+      .select("username, avatar_url")
+      .eq("id", user.id)
+      .single();
+    
+    if (data) setProfile(data);
+  };
 
   const handleSignOut = async () => {
     await signOut();
     toast.success("Logout realizado com sucesso!");
   };
+
+  const userInitials = profile?.username?.slice(0, 2).toUpperCase() || user?.email?.slice(0, 2).toUpperCase() || "U";
 
   return (
     <>
@@ -65,20 +88,23 @@ export const Navigation = () => {
                     <NavItem to="/ai-creative" icon={Sparkles}>IA Criativo</NavItem>
                   </>
                 )}
-                <NavItem to="/support" icon={MessageCircle}>Suporte</NavItem>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Notifications />
               <Button variant="ghost" size="icon" asChild>
                 <Link to="/support">
                   <MessageCircle className="w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
-              </Button>
+              <Link to="/profile">
+                <Avatar className="w-10 h-10 cursor-pointer ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                    {userInitials}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
             </div>
           </div>
         </div>
