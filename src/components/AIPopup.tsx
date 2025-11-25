@@ -1,7 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { FileText, Palette } from "lucide-react";
+import { FileText, Palette, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Badge } from "@/components/ui/badge";
 
 interface AIPopupProps {
   open: boolean;
@@ -10,17 +12,58 @@ interface AIPopupProps {
 
 export const AIPopup = ({ open, onOpenChange }: AIPopupProps) => {
   const navigate = useNavigate();
+  const { isPremium, loading } = useSubscription();
 
   const handleNavigate = (path: string) => {
+    if (!isPremium) {
+      return; // Don't navigate if not premium
+    }
     onOpenChange(false);
     navigate(path);
   };
+
+  if (loading) {
+    return null;
+  }
+
+  if (!isPremium) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl">✨ Assistentes IA</DialogTitle>
+            <DialogDescription className="text-center">
+              Recurso exclusivo para membros Premium
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6 text-center space-y-4">
+            <Lock className="w-16 h-16 mx-auto text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              Faça upgrade para acessar os assistentes de IA e criar conteúdos incríveis!
+            </p>
+            <Button 
+              className="gradient-fire w-full"
+              onClick={() => {
+                onOpenChange(false);
+                navigate('/profile');
+              }}
+            >
+              Fazer Upgrade para Premium
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl">✨ Assistentes IA</DialogTitle>
+          <DialogTitle className="text-center text-xl flex items-center justify-center gap-2">
+            ✨ Assistentes IA
+            <Badge variant="default" className="text-xs">Premium</Badge>
+          </DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <Button 

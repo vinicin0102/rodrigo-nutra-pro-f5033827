@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MoreHorizontal, Image as ImageIcon, X, Send, User, Trophy, LogOut } from "lucide-react";
+import { Heart, MoreHorizontal, Image as ImageIcon, X, Send, User, Trophy, LogOut, Medal, Award } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -30,6 +31,8 @@ interface Post {
   reactions?: Record<string, number>;
   user_reactions?: string[];
   comments_count?: number;
+  user_points?: number;
+  user_badges?: Array<{ badge_icon: string; badge_name: string }>;
 }
 
 const Index = () => {
@@ -76,10 +79,10 @@ const Index = () => {
 
       const postsWithData = await Promise.all(
         (postsData || []).map(async (post) => {
-          const [profileData, reactionsData, commentsData] = await Promise.all([
+          const [profileData, reactionsData, commentsData, badgesData] = await Promise.all([
             supabase
               .from("profiles")
-              .select("username, avatar_url")
+              .select("username, avatar_url, points")
               .eq("id", post.user_id)
               .single(),
             supabase
@@ -89,7 +92,11 @@ const Index = () => {
             supabase
               .from("post_comments")
               .select("id", { count: "exact" })
-              .eq("post_id", post.id)
+              .eq("post_id", post.id),
+            supabase
+              .from("user_badges")
+              .select("badge_icon, badge_name")
+              .eq("user_id", post.user_id)
           ]);
 
           const reactions: Record<string, number> = {};
@@ -106,6 +113,8 @@ const Index = () => {
             ...post,
             username: profileData.data?.username || "Usuário",
             avatar_url: profileData.data?.avatar_url,
+            user_points: profileData.data?.points || 0,
+            user_badges: badgesData.data || [],
             reactions,
             user_reactions: userReactions,
             comments_count: commentsData.count || 0
@@ -247,6 +256,14 @@ const Index = () => {
     return `${Math.floor(seconds / 86400)}d`;
   };
 
+  const getLevel = (points: number) => {
+    if (points >= 2000) return { name: "Diamante", color: "gradient-elite", icon: Trophy };
+    if (points >= 1500) return { name: "Platina", color: "bg-slate-300 text-slate-800", icon: Medal };
+    if (points >= 1000) return { name: "Ouro", color: "bg-yellow-500 text-yellow-900", icon: Award };
+    if (points >= 500) return { name: "Prata", color: "bg-gray-400 text-gray-900", icon: Medal };
+    return { name: "Bronze", color: "bg-amber-700 text-amber-50", icon: Medal };
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
       <Navigation />
@@ -378,8 +395,19 @@ const Index = () => {
                       </Avatar>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{post.username || "Usuário"}</p>
-                      <p className="text-xs text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm truncate">{post.username || "Usuário"}</p>
+                        <Badge className={`text-xs ${getLevel(post.user_points || 0).color}`}>
+                          {getLevel(post.user_points || 0).name}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        {(post.user_badges || []).slice(0, 5).map((badge, idx) => (
+                          <span key={idx} title={badge.badge_name} className="text-xs">
+                            {badge.badge_icon}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
