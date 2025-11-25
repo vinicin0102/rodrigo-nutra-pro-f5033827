@@ -16,7 +16,7 @@ import { Progress } from "@/components/ui/progress";
 interface ProfileData {
   username: string;
   avatar_url: string | null;
-  bio: string | null;
+  bio?: string | null;
   points: number;
   total_sales: number;
 }
@@ -62,11 +62,11 @@ const Profile = () => {
       setProfile({
         username: data.username,
         avatar_url: data.avatar_url,
-        bio: data.bio || null,
+        bio: (data as any).bio || null,
         points: data.points || 0,
         total_sales: data.total_sales || 0,
       });
-      setBioText(data.bio || "");
+      setBioText((data as any).bio || "");
     } catch (error: any) {
       console.error("Error fetching profile:", error);
       toast.error("Erro ao carregar perfil");
@@ -78,13 +78,13 @@ const Profile = () => {
   const fetchAwards = async () => {
     try {
       const { data, error } = await supabase
-        .from("user_awards")
+        .from("user_awards" as any)
         .select("*")
         .eq("user_id", user?.id)
         .order("earned_at", { ascending: false });
 
       if (error) throw error;
-      setAwards(data || []);
+      setAwards((data || []) as unknown as UserAward[]);
     } catch (error: any) {
       console.error("Error fetching awards:", error);
     }
@@ -152,7 +152,7 @@ const Profile = () => {
     try {
       const { error } = await supabase
         .from("profiles")
-        .update({ bio: bioText })
+        .update({ bio: bioText } as any)
         .eq("id", user.id);
 
       if (error) throw error;

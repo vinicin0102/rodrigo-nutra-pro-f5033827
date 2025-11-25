@@ -184,6 +184,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          bio: string | null
           created_at: string
           id: string
           points: number
@@ -192,6 +193,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           id: string
           points?: number
@@ -200,6 +202,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           id?: string
           points?: number
@@ -236,6 +239,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_awards: {
+        Row: {
+          award_category: string | null
+          award_description: string | null
+          award_icon: string | null
+          award_name: string
+          created_at: string
+          earned_at: string
+          id: string
+          points_cost: number | null
+          user_id: string
+        }
+        Insert: {
+          award_category?: string | null
+          award_description?: string | null
+          award_icon?: string | null
+          award_name: string
+          created_at?: string
+          earned_at?: string
+          id?: string
+          points_cost?: number | null
+          user_id: string
+        }
+        Update: {
+          award_category?: string | null
+          award_description?: string | null
+          award_icon?: string | null
+          award_name?: string
+          created_at?: string
+          earned_at?: string
+          id?: string
+          points_cost?: number | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
