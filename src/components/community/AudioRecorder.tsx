@@ -18,7 +18,28 @@ export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps)
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      
+      // Detectar formato de áudio mais compatível
+      const getSupportedMimeType = () => {
+        const types = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/mp4',
+          'audio/ogg'
+        ];
+        
+        for (const type of types) {
+          if (MediaRecorder.isTypeSupported(type)) {
+            console.log('Using audio format:', type);
+            return type;
+          }
+        }
+        return 'audio/webm'; // fallback
+      };
+
+      const mimeType = getSupportedMimeType();
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
@@ -29,7 +50,8 @@ export const AudioRecorder = ({ onAudioRecorded, disabled }: AudioRecorderProps)
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+        console.log('Audio recorded:', { size: audioBlob.size, type: audioBlob.type });
         onAudioRecorded(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };

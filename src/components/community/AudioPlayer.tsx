@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Play, Pause, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,8 +33,16 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
       setCurrentTime(0);
     };
 
-    const handleError = () => {
-      console.error("Erro ao carregar áudio:", audioUrl);
+    const handleError = (e: Event) => {
+      const audio = e.target as HTMLAudioElement;
+      console.error("Erro ao carregar áudio:", {
+        url: audioUrl,
+        error: audio.error,
+        code: audio.error?.code,
+        message: audio.error?.message,
+        networkState: audio.networkState,
+        readyState: audio.readyState
+      });
       setError(true);
       setLoading(false);
     };
@@ -87,6 +95,12 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Gerar alturas do waveform apenas uma vez para evitar flickering
+  const waveformBars = useMemo(() => 
+    Array.from({ length: 40 }, () => Math.random() * 60 + 40),
+    []
+  );
+
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   if (error) {
@@ -103,7 +117,12 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
     <div className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
       isOwn ? "bg-primary/10" : "bg-muted"
     }`}>
-      <audio ref={audioRef} src={audioUrl} preload="metadata" />
+      <audio 
+        ref={audioRef} 
+        src={audioUrl} 
+        preload="metadata"
+        crossOrigin="anonymous"
+      />
       
       {/* Play/Pause Button */}
       <Button
@@ -130,8 +149,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
           onClick={handleProgressClick}
         >
           {/* Simulated waveform bars */}
-          {[...Array(40)].map((_, i) => {
-            const height = Math.random() * 60 + 40;
+          {waveformBars.map((height, i) => {
             const isPast = (i / 40) * 100 <= progress;
             return (
               <div
