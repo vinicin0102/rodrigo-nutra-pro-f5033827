@@ -3,14 +3,15 @@ import { Navigation } from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, Image as ImageIcon, X } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Heart, MessageCircle, Bookmark, MoreHorizontal, Image as ImageIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { PostReactions } from "@/components/feed/PostReactions";
 import { PostComments } from "@/components/feed/PostComments";
 import { DiamondAnimation } from "@/components/DiamondAnimation";
-import { cn } from "@/lib/utils";
+import { FollowButton } from "@/components/FollowButton";
 
 interface Post {
   id: string;
@@ -32,6 +33,7 @@ interface Post {
 const Index = () => {
   const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [feedFilter, setFeedFilter] = useState<"all" | "following">("all");
   const [newPost, setNewPost] = useState("");
   const [loading, setLoading] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
@@ -42,14 +44,34 @@ const Index = () => {
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [feedFilter, user]);
 
   const fetchPosts = async () => {
     try {
-      const { data: postsData, error: postsError } = await supabase
+      let query = supabase
         .from("posts")
         .select("*, post_likes (user_id)")
         .order("created_at", { ascending: false });
+
+      // Se filtro for "following", buscar apenas posts de pessoas seguidas
+      if (feedFilter === "following" && user) {
+        // Primeiro, buscar IDs das pessoas que o usuário segue
+        const { data: followingData } = await supabase
+          .from("followers")
+          .select("following_id")
+          .eq("follower_id", user.id);
+
+        if (followingData && followingData.length > 0) {
+          const followingIds = followingData.map(f => f.following_id);
+          query = query.in("user_id", followingIds);
+        } else {
+          // Se não segue ninguém, não mostrar posts
+          setPosts([]);
+          return;
+        }
+      }
+
+      const { data: postsData, error: postsError } = await query;
 
       if (postsError) throw postsError;
 
@@ -207,9 +229,19 @@ const Index = () => {
             </Button>
           </div>
         </div>
+
+        {/* Filtro do Feed */}
+        <div className="max-w-2xl mx-auto px-4 pb-2">
+          <Tabs value={feedFilter} onValueChange={(v) => setFeedFilter(v as "all" | "following")}>
+            <TabsList className="w-full grid grid-cols-2">
+              <TabsTrigger value="all">Para Você</TabsTrigger>
+              <TabsTrigger value="following">Seguindo</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </header>
 
-      <div className="max-w-2xl mx-auto pt-28 md:pt-28">
+      <div className="max-w-2xl mx-auto pt-36 md:pt-36">
         {/* Criar Post - Expandível */}
         {showCreatePost && (
           <div className="bg-background border-b border-border p-4 space-y-3">
@@ -274,8 +306,8 @@ const Index = () => {
               <article key={post.id} className="bg-background border-b border-border">
                 {/* Header do Post */}
                 <div className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="relative flex-shrink-0">
                       <div className="absolute inset-0 bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500 rounded-full blur-sm"></div>
                       <Avatar className="relative w-10 h-10 ring-2 ring-background">
                         <AvatarImage src={post.avatar_url || undefined} />
@@ -284,14 +316,17 @@ const Index = () => {
                         </AvatarFallback>
                       </Avatar>
                     </div>
-                    <div>
-                      <p className="font-semibold text-sm">{post.username || "Usuário"}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-sm truncate">{post.username || "Usuário"}</p>
                       <p className="text-xs text-muted-foreground">{formatTimeAgo(post.created_at)}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </Button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <FollowButton userId={post.user_id} variant="ghost" size="sm" showIcon={false} />
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <MoreHorizontal className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
 
                 {/* Imagem do Post (largura total) */}
@@ -358,7 +393,10 @@ const Index = () => {
           {posts.length === 0 && (
             <div className="text-center py-20 px-4">
               <p className="text-muted-foreground">
-                Seja o primeiro a compartilhar! 🚀
+                {feedFilter === "following" 
+                  ? "Você ainda não segue ninguém. Explore o feed 'Para Você' e comece a seguir pessoas! 👥"
+                  : "Seja o primeiro a compartilhar! 🚀"
+                }
               </p>
             </div>
           )}
