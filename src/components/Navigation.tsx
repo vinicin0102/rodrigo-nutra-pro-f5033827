@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { Notifications } from "./Notifications";
 
 interface NavItemProps {
   to: string;
@@ -65,10 +66,13 @@ export const Navigation = () => {
                 <NavItem to="/support" icon={MessageCircle}>Suporte</NavItem>
               </div>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
+            <div className="flex items-center gap-2">
+              <Notifications />
+              <Button variant="ghost" size="sm" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
