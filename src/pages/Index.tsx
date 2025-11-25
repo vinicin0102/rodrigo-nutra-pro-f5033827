@@ -13,6 +13,7 @@ import { PostComments } from "@/components/feed/PostComments";
 import { DiamondAnimation } from "@/components/DiamondAnimation";
 import { FollowButton } from "@/components/FollowButton";
 import { BadgeIcon } from "@/components/BadgeIcon";
+import { Notifications } from "@/components/Notifications";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
@@ -280,28 +281,31 @@ const Index = () => {
       <header className="fixed top-0 md:top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-40">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gradient-fire">NutraHub</h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-primary/50 hover:ring-primary transition-all">
-                <AvatarImage src={userProfile?.avatar_url || undefined} />
-                <AvatarFallback className="bg-gradient-fire text-white text-xs">
-                  {(userProfile?.username || "U").substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
-                <User className="w-4 h-4 mr-2" /> Editar Perfil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/ranking')}>
-                <Trophy className="w-4 h-4 mr-2" /> Meu Ranking
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" /> Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-3">
+            <Notifications />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-primary/50 hover:ring-primary transition-all">
+                  <AvatarImage src={userProfile?.avatar_url || undefined} />
+                  <AvatarFallback className="bg-gradient-fire text-white text-xs">
+                    {(userProfile?.username || "U").substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  <User className="w-4 h-4 mr-2" /> Editar Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/ranking')}>
+                  <Trophy className="w-4 h-4 mr-2" /> Meu Ranking
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="w-4 h-4 mr-2" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Barra Motivacional */}
