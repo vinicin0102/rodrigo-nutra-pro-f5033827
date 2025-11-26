@@ -171,21 +171,19 @@ const Community = () => {
     }
     setPendingAudio(null);
     setPendingAudioUrl(null);
-    // O AudioRecorder vai iniciar uma nova gravação automaticamente
   };
 
   const uploadAudio = async (audioBlob: Blob): Promise<string> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    // Detectar extensão correta baseada no tipo MIME
     const getExtension = (mimeType: string): string => {
       if (mimeType.includes('mp4')) return 'mp4';
       if (mimeType.includes('aac')) return 'aac';
       if (mimeType.includes('ogg')) return 'ogg';
       if (mimeType.includes('webm')) return 'webm';
       if (mimeType.includes('wav')) return 'wav';
-      return 'webm'; // fallback
+      return 'webm';
     };
 
     const extension = getExtension(audioBlob.type);
@@ -208,16 +206,8 @@ const Community = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🚀 handleSendMessage called');
-    console.log('📊 State:', { 
-      user: user?.id, 
-      newMessage: newMessage.length, 
-      pendingImage: !!pendingImage, 
-      pendingAudio: !!pendingAudio 
-    });
 
     if (!user) {
-      console.error('❌ No user - returning early');
       toast({
         title: "Erro de autenticação",
         description: "Você precisa estar logado para enviar mensagens",
@@ -227,20 +217,15 @@ const Community = () => {
     }
 
     if (!newMessage.trim() && !pendingImage && !pendingAudio) {
-      console.log('⚠️ No content to send - returning early');
       return;
     }
 
     try {
-      console.log('✅ Starting message send...');
       let audioUrl = null;
       if (pendingAudio) {
-        console.log('🎵 Uploading audio...');
         audioUrl = await uploadAudio(pendingAudio);
-        console.log('✅ Audio uploaded:', audioUrl);
       }
 
-      console.log('💾 Inserting message to database...');
       const { error } = await supabase
         .from('community_messages')
         .insert({
@@ -250,12 +235,8 @@ const Community = () => {
           audio_url: audioUrl,
         });
 
-      if (error) {
-        console.error('❌ Database error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('✅ Message sent successfully!');
       setNewMessage("");
       setPendingImage(null);
       setPendingAudio(null);
@@ -264,7 +245,6 @@ const Community = () => {
         setPendingAudioUrl(null);
       }
 
-      // Clear typing indicator
       await supabase
         .from('typing_indicators')
         .delete()
@@ -272,7 +252,7 @@ const Community = () => {
         .eq('channel', 'community');
 
     } catch (error) {
-      console.error('❌ Error sending message:', error);
+      console.error('Error sending message:', error);
       toast({
         title: "Erro ao enviar mensagem",
         description: error instanceof Error ? error.message : "Tente novamente",
@@ -286,17 +266,10 @@ const Community = () => {
     return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // Gera cor consistente baseada no user_id
   const getUserColor = (userId: string) => {
     const colors = [
-      '#FF6B9D', // Rosa
-      '#FFB84D', // Amarelo/Laranja
-      '#A78BFA', // Roxo
-      '#60A5FA', // Azul
-      '#34D399', // Verde
-      '#F87171', // Vermelho
-      '#FCD34D', // Amarelo
-      '#C084FC', // Roxo claro
+      '#FF6B9D', '#FFB84D', '#A78BFA', '#60A5FA', 
+      '#34D399', '#F87171', '#FCD34D', '#C084FC',
     ];
     const index = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return colors[index % colors.length];
@@ -308,7 +281,6 @@ const Community = () => {
       
       <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-32 md:pb-8">
         <div className="max-w-4xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
-          {/* Main Chat */}
           <div className="flex-1 flex flex-col min-w-0 min-h-0">
             <div className="text-center space-y-2 mb-6 flex-shrink-0">
               <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
@@ -322,81 +294,98 @@ const Community = () => {
             {/* Messages Area */}
             <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#0A0A0A' }}>
               <ScrollArea className="h-full overscroll-contain">
-              <div ref={scrollRef} className="p-4 space-y-3">
-                {loading ? (
-                  <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
-                    Carregando mensagens...
-                  </div>
-                ) : messages.length === 0 ? (
-                  <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
-                    Seja o primeiro a enviar uma mensagem! 👋
-                  </div>
-                ) : (
-                  messages.map((message, idx) => {
-                    const isOwn = message.user_id === user?.id;
-                    const username = message.profiles?.username || 'Usuário';
-                    const initials = username.split(' ').map(n => n[0]).join('').toUpperCase();
-                    const userColor = getUserColor(message.user_id);
-                    
-                    // Mostrar avatar apenas se for diferente da mensagem anterior
-                    const prevMessage = idx > 0 ? messages[idx - 1] : null;
-                    const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id;
+                <div ref={scrollRef} className="p-4 space-y-3">
+                  {loading ? (
+                    <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
+                      Carregando mensagens...
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
+                      Seja o primeiro a enviar uma mensagem! 👋
+                    </div>
+                  ) : (
+                    messages.map((message, idx) => {
+                      const isOwn = message.user_id === user?.id;
+                      const username = message.profiles?.username || 'Usuário';
+                      const initials = username.split(' ').map(n => n[0]).join('').toUpperCase();
+                      const userColor = getUserColor(message.user_id);
+                      
+                      const prevMessage = idx > 0 ? messages[idx - 1] : null;
+                      const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id;
 
-                    return (
-                      <div
-                        key={message.id}
-                        className="flex gap-2 items-start"
-                      >
-                        {showAvatar ? (
-                          <Avatar className="w-8 h-8 flex-shrink-0 ring-2 ring-white/10">
-                            <AvatarImage src={message.profiles?.avatar_url || ''} />
-                            <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold">
-                              {initials}
-                            </AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <div className="w-8 flex-shrink-0" />
-                        )}
-                        
-                        <div className="flex-1 min-w-0">
-                          {showAvatar && (
-                            <div className="flex items-baseline gap-2 mb-1">
-                              <span className="text-sm font-semibold" style={{ color: userColor }}>
-                                {username}
-                              </span>
-                            </div>
+                      return (
+                        <div
+                          key={message.id}
+                          className={cn(
+                            "flex gap-2 items-end mb-1",
+                            isOwn ? "justify-end" : "justify-start"
+                          )}
+                        >
+                          {/* Avatar apenas para mensagens de outros */}
+                          {!isOwn && (
+                            showAvatar ? (
+                              <Avatar className="w-8 h-8 flex-shrink-0 ring-2 ring-white/10">
+                                <AvatarImage src={message.profiles?.avatar_url || ''} />
+                                <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold text-xs">
+                                  {initials}
+                                </AvatarFallback>
+                              </Avatar>
+                            ) : (
+                              <div className="w-8 flex-shrink-0" />
+                            )
                           )}
                           
-                          <div className="rounded-xl px-3 py-2 max-w-lg" style={{ backgroundColor: '#1F1F1F' }}>
-                            {message.content && (
-                              <p className="text-xs text-gray-100 leading-relaxed">{message.content}</p>
+                          <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
+                            {/* Nome apenas para mensagens de outros */}
+                            {!isOwn && showAvatar && (
+                              <span className="text-xs font-semibold mb-1 px-1" style={{ color: '#25D366' }}>
+                                {username}
+                              </span>
                             )}
-                            {message.image_url && (
-                              <img 
-                                src={message.image_url} 
-                                alt="Mensagem"
-                                className="rounded-lg mt-3 max-w-xs h-auto"
-                              />
-                            )}
-                            {message.audio_url && (
-                              <div className="mt-2">
-                                <AudioPlayer 
-                                  audioUrl={message.audio_url} 
-                                  isOwn={false}
+                            
+                            {/* Balão da mensagem */}
+                            <div 
+                              className={cn(
+                                "rounded-lg px-3 py-2 max-w-[80%] md:max-w-md relative pb-5",
+                                isOwn ? "rounded-br-none" : "rounded-bl-none"
+                              )}
+                              style={{ 
+                                backgroundColor: isOwn ? '#005C4B' : '#1F2C34'
+                              }}
+                            >
+                              {message.content && (
+                                <p className="text-sm text-white leading-relaxed break-words">
+                                  {message.content}
+                                </p>
+                              )}
+                              {message.image_url && (
+                                <img 
+                                  src={message.image_url} 
+                                  alt="Mensagem"
+                                  className="rounded-lg mt-2 max-w-full h-auto"
                                 />
-                              </div>
-                            )}
+                              )}
+                              {message.audio_url && (
+                                <div className="mt-2">
+                                  <AudioPlayer 
+                                    audioUrl={message.audio_url} 
+                                    isOwn={isOwn}
+                                  />
+                                </div>
+                              )}
+                              
+                              {/* Timestamp dentro do balão */}
+                              <span className="text-[10px] text-gray-300/70 absolute bottom-1 right-2 flex items-center gap-1">
+                                {formatTime(message.created_at)}
+                                {isOwn && <span className="text-blue-400">✓✓</span>}
+                              </span>
+                            </div>
                           </div>
-                          
-                          <span className="text-[10px] text-gray-500 mt-1 inline-block">
-                            {formatTime(message.created_at)}
-                          </span>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+                      );
+                    })
+                  )}
+                </div>
               </ScrollArea>
               <TypingIndicator />
             </div>
@@ -407,53 +396,99 @@ const Community = () => {
               className="flex-shrink-0 rounded-lg p-4 min-h-[120px] flex flex-col justify-end space-y-3"
               style={{ backgroundColor: '#1F1F1F' }}
             >
-            {/* Preview attachments */}
-...
-            {/* Botões de mídia */}
-            <div className="flex gap-2 mb-2">
-              <MediaUpload 
-                onImageSelected={setPendingImage}
-                disabled={!!pendingImage}
-              />
+              {/* Preview attachments */}
+              {(pendingImage || pendingAudioUrl) && (
+                <div className="flex gap-2 flex-wrap">
+                  {pendingImage && (
+                    <div className="relative">
+                      <img src={pendingImage} alt="Preview" className="h-20 w-20 object-cover rounded-lg" />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="destructive"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        onClick={() => setPendingImage(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {pendingAudioUrl && (
+                    <div className="relative bg-purple-600/20 rounded-lg p-3 flex items-center gap-2">
+                      <audio src={pendingAudioUrl} controls className="h-8" />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 rounded-full hover:bg-purple-600/30"
+                        onClick={handleRerecordAudio}
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 rounded-full hover:bg-red-600/30"
+                        onClick={() => {
+                          if (pendingAudioUrl) URL.revokeObjectURL(pendingAudioUrl);
+                          setPendingAudio(null);
+                          setPendingAudioUrl(null);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Botões de mídia */}
+              <div className="flex gap-2 mb-2">
+                <MediaUpload 
+                  onImageSelected={setPendingImage}
+                  disabled={!!pendingImage}
+                />
+                
+                <AudioRecorder 
+                  onAudioRecorded={handleAudioRecorded}
+                  disabled={!!pendingAudio}
+                />
+                
+                <EmojiPicker 
+                  onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
+                />
+              </div>
               
-              <AudioRecorder 
-                onAudioRecorded={handleAudioRecorded}
-                disabled={!!pendingAudio}
-              />
-              
-              <EmojiPicker 
-                onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
-              />
-            </div>
-            
-            {/* Input + Enviar */}
-            <div className="flex gap-2 items-end">
-              <Input
-                value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value);
-                  handleTyping();
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSendMessage(e as any);
-                  }
-                }}
-                placeholder="Digite sua mensagem..."
-                className="flex-1 h-12 text-base bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
-                style={{ backgroundColor: '#0A0A0A' }}
-                autoFocus
-              />
-              
-              <Button 
-                type="submit"
-                disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
-                className="h-12 w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              >
-                <Send className="w-5 h-5" />
-              </Button>
-            </div>
+              {/* Input + Enviar */}
+              <div className="flex gap-2 items-end">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => {
+                    setNewMessage(e.target.value);
+                    handleTyping();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e as any);
+                    }
+                  }}
+                  placeholder="Digite sua mensagem..."
+                  className="flex-1 h-12 text-base bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                  style={{ backgroundColor: '#0A0A0A' }}
+                  autoFocus
+                />
+                
+                <Button 
+                  type="submit"
+                  disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
+                  className="h-12 w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
             </form>
           </div>
         </div>
