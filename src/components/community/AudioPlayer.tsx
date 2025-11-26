@@ -131,7 +131,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
 
   return (
     <div className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
-      isOwn ? "bg-orange-600/20" : "bg-gray-200"
+      isOwn ? "bg-orange-500/20" : "bg-slate-100"
     }`}>
       <audio 
         ref={audioRef} 
@@ -172,8 +172,8 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
                 key={i}
                 className={`flex-1 rounded-full transition-all ${
                   isPast 
-                    ? isOwn ? "bg-white" : "bg-orange-500"
-                    : isOwn ? "bg-white/40" : "bg-gray-400/40"
+                    ? isOwn ? "bg-white" : "bg-amber-500"
+                    : isOwn ? "bg-white/30" : "bg-slate-300"
                 } ${isPlaying && isPast ? "animate-waveform" : ""}`}
                 style={{ 
                   height: `${height}%`,

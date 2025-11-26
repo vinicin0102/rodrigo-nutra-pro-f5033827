@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, X, Play } from "lucide-react";
+import { Send, X, Play, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,11 +34,13 @@ const Community = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingAudio, setPendingAudio] = useState<Blob | null>(null);
   const [pendingAudioUrl, setPendingAudioUrl] = useState<string | null>(null);
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -66,10 +68,16 @@ const Community = () => {
   }, []);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      setTimeout(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
+    }
+  }, [loading]);
 
   const fetchMessages = async () => {
     try {
@@ -207,6 +215,8 @@ const Community = () => {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isSending) return;
+
     if (!user) {
       toast({
         title: "Erro de autenticação",
@@ -219,6 +229,8 @@ const Community = () => {
     if (!newMessage.trim() && !pendingImage && !pendingAudio) {
       return;
     }
+
+    setIsSending(true);
 
     try {
       let audioUrl = null;
@@ -258,6 +270,8 @@ const Community = () => {
         description: error instanceof Error ? error.message : "Tente novamente",
         variant: "destructive",
       });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -292,7 +306,7 @@ const Community = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4 bg-white">
+            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#FAFAFA' }}>
               <ScrollArea className="h-full overscroll-contain">
                 <div ref={scrollRef} className="p-4 space-y-3">
                   {loading ? (
@@ -338,7 +352,7 @@ const Community = () => {
                           <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
                             {/* Nome apenas para mensagens de outros */}
                             {!isOwn && showAvatar && (
-                              <span className="text-xs font-semibold mb-1 px-1 text-orange-500">
+                              <span className="text-xs font-semibold mb-1 px-1 text-amber-600">
                                 {username}
                               </span>
                             )}
@@ -350,11 +364,13 @@ const Community = () => {
                                 isOwn ? "rounded-br-none" : "rounded-bl-none"
                               )}
                               style={{ 
-                                backgroundColor: isOwn ? '#F97316' : '#E5E7EB'
+                                background: isOwn 
+                                  ? 'linear-gradient(135deg, #FB923C 0%, #F97316 100%)'
+                                  : '#F9FAFB'
                               }}
                             >
                               {message.content && (
-                                <p className={cn("text-sm leading-relaxed break-words", isOwn ? "text-white" : "text-gray-800")}>
+                                <p className={cn("text-sm leading-relaxed break-words", isOwn ? "text-white" : "text-gray-700")}>
                                   {message.content}
                                 </p>
                               )}
@@ -375,7 +391,7 @@ const Community = () => {
                               )}
                               
                               {/* Timestamp dentro do balão */}
-                              <span className={cn("text-[10px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-white/70" : "text-gray-500")}>
+                              <span className={cn("text-[10px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-orange-100" : "text-gray-500")}>
                                 {formatTime(message.created_at)}
                                 {isOwn && <span className="text-white/90">✓✓</span>}
                               </span>
@@ -385,6 +401,7 @@ const Community = () => {
                       );
                     })
                   )}
+                  <div ref={bottomRef} />
                 </div>
               </ScrollArea>
               <TypingIndicator />
@@ -393,7 +410,7 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 rounded-lg p-3 space-y-2 bg-gray-100"
+              className="flex-shrink-0 rounded-lg p-3 space-y-2 bg-slate-50 border border-slate-200"
             >
               {/* Preview attachments */}
               {(pendingImage || pendingAudioUrl) && (
@@ -478,10 +495,14 @@ const Community = () => {
                 
                 <Button 
                   type="submit"
-                  disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
+                  disabled={isSending || (!newMessage.trim() && !pendingImage && !pendingAudio)}
                   className="h-10 w-10 flex-shrink-0 rounded-full bg-orange-500 hover:bg-orange-600"
                 >
-                  <Send className="w-4 h-4" />
+                  {isSending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
             </form>
