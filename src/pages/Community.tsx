@@ -338,21 +338,21 @@ const Community = () => {
                           {/* Avatar apenas para mensagens de outros */}
                           {!isOwn && (
                             showAvatar ? (
-                              <Avatar className="w-8 h-8 flex-shrink-0 ring-2 ring-white/10">
+                              <Avatar className="w-6 h-6 flex-shrink-0 ring-2 ring-white/10">
                                 <AvatarImage src={message.profiles?.avatar_url || ''} />
                                 <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold text-xs">
                                   {initials}
                                 </AvatarFallback>
                               </Avatar>
                             ) : (
-                              <div className="w-8 flex-shrink-0" />
+                              <div className="w-6 flex-shrink-0" />
                             )
                           )}
                           
                           <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
                             {/* Nome apenas para mensagens de outros */}
                             {!isOwn && showAvatar && (
-                              <span className="text-xs font-semibold mb-1 px-1 text-amber-600">
+                              <span className="text-[10px] font-semibold mb-0.5 px-1 text-amber-600">
                                 {username}
                               </span>
                             )}
@@ -360,7 +360,7 @@ const Community = () => {
                             {/* Balão da mensagem */}
                             <div 
                               className={cn(
-                                "rounded-lg px-3 py-2 max-w-[80%] md:max-w-md relative pb-5",
+                                "rounded-lg px-2.5 py-1.5 max-w-[70%] md:max-w-sm relative pb-4",
                                 isOwn ? "rounded-br-none" : "rounded-bl-none"
                               )}
                               style={{ 
@@ -370,7 +370,7 @@ const Community = () => {
                               }}
                             >
                               {message.content && (
-                                <p className={cn("text-sm leading-relaxed break-words", isOwn ? "text-white" : "text-gray-700")}>
+                                <p className={cn("text-xs leading-relaxed break-words", isOwn ? "text-white" : "text-gray-700")}>
                                   {message.content}
                                 </p>
                               )}
@@ -378,7 +378,7 @@ const Community = () => {
                                 <img 
                                   src={message.image_url} 
                                   alt="Mensagem"
-                                  className="rounded-lg mt-2 max-w-full h-auto"
+                                  className="rounded-lg mt-2 max-w-[200px] h-auto"
                                 />
                               )}
                               {message.audio_url && (
@@ -391,7 +391,7 @@ const Community = () => {
                               )}
                               
                               {/* Timestamp dentro do balão */}
-                              <span className={cn("text-[10px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-orange-100" : "text-gray-500")}>
+                              <span className={cn("text-[9px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-orange-100" : "text-gray-500")}>
                                 {formatTime(message.created_at)}
                                 {isOwn && <span className="text-white/90">✓✓</span>}
                               </span>
