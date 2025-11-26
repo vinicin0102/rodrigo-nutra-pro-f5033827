@@ -95,9 +95,9 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  // Gerar alturas do waveform apenas uma vez para evitar flickering
+  // Gerar alturas do waveform apenas uma vez para evitar flickering (60 barras mais finas)
   const waveformBars = useMemo(() => 
-    Array.from({ length: 40 }, () => Math.random() * 60 + 40),
+    Array.from({ length: 60 }, () => Math.random() * 60 + 40),
     []
   );
 
@@ -158,35 +158,41 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
         )}
       </Button>
 
-      {/* Waveform/Progress Bar */}
-      <div className="flex-1 flex items-center gap-2 min-w-0">
+      {/* Waveform com bolinha e tempo embaixo - estilo WhatsApp */}
+      <div className="flex-1 flex flex-col gap-1 min-w-0">
+        {/* Waveform com bolinha de progresso */}
         <div 
-          className="flex-1 h-8 cursor-pointer relative flex items-center gap-0.5 px-1"
+          className="relative h-8 cursor-pointer flex items-center gap-[2px] px-1"
           onClick={handleProgressClick}
         >
-          {/* Simulated waveform bars */}
+          {/* Bolinha azul de progresso */}
+          <div 
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-blue-500 rounded-full shadow-md z-10 transition-all"
+            style={{ left: `calc(${progress}% - 6px)` }}
+          />
+          
+          {/* Barras do waveform mais finas */}
           {waveformBars.map((height, i) => {
-            const isPast = (i / 40) * 100 <= progress;
+            const isPast = (i / 60) * 100 <= progress;
             return (
               <div
                 key={i}
-                className={`flex-1 rounded-full transition-all ${
+                className={`w-[2px] rounded-full transition-all ${
                   isPast 
-                    ? isOwn ? "bg-white" : "bg-amber-500"
-                    : isOwn ? "bg-white/30" : "bg-slate-300"
-                } ${isPlaying && isPast ? "animate-waveform" : ""}`}
+                    ? isOwn ? "bg-white" : "bg-gray-400"
+                    : isOwn ? "bg-white/30" : "bg-gray-300/50"
+                }`}
                 style={{ 
-                  height: `${height}%`,
-                  animationDelay: `${i * 30}ms`
+                  height: `${height}%`
                 }}
               />
             );
           })}
         </div>
 
-        {/* Time Display */}
-        <div className={`flex flex-col text-[10px] flex-shrink-0 leading-tight ${
-          isOwn ? "text-white/70" : "text-gray-600"
+        {/* Tempo embaixo do waveform */}
+        <div className={`flex justify-between text-[10px] px-1 ${
+          isOwn ? "text-orange-100" : "text-gray-500"
         }`}>
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
