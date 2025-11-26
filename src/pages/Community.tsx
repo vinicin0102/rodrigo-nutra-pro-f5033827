@@ -276,7 +276,7 @@ const Community = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col md:pt-16" style={{ backgroundColor: '#0A0A0A' }}>
+    <div className="h-screen overflow-hidden flex flex-col md:pt-16 bg-white">
       <Navigation />
       
       <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-32 md:pb-8">
@@ -292,15 +292,15 @@ const Community = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#0A0A0A' }}>
+            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4 bg-white">
               <ScrollArea className="h-full overscroll-contain">
                 <div ref={scrollRef} className="p-4 space-y-3">
                   {loading ? (
-                    <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
+                    <div className="text-center py-8 text-orange-500">
                       Carregando mensagens...
                     </div>
                   ) : messages.length === 0 ? (
-                    <div className="text-center py-8" style={{ color: '#9CA3AF' }}>
+                    <div className="text-center py-8 text-gray-500">
                       Seja o primeiro a enviar uma mensagem! 👋
                     </div>
                   ) : (
@@ -338,7 +338,7 @@ const Community = () => {
                           <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
                             {/* Nome apenas para mensagens de outros */}
                             {!isOwn && showAvatar && (
-                              <span className="text-xs font-semibold mb-1 px-1" style={{ color: '#25D366' }}>
+                              <span className="text-xs font-semibold mb-1 px-1 text-orange-500">
                                 {username}
                               </span>
                             )}
@@ -350,11 +350,11 @@ const Community = () => {
                                 isOwn ? "rounded-br-none" : "rounded-bl-none"
                               )}
                               style={{ 
-                                backgroundColor: isOwn ? '#005C4B' : '#1F2C34'
+                                backgroundColor: isOwn ? '#F97316' : '#E5E7EB'
                               }}
                             >
                               {message.content && (
-                                <p className="text-sm text-white leading-relaxed break-words">
+                                <p className={cn("text-sm leading-relaxed break-words", isOwn ? "text-white" : "text-gray-800")}>
                                   {message.content}
                                 </p>
                               )}
@@ -375,9 +375,9 @@ const Community = () => {
                               )}
                               
                               {/* Timestamp dentro do balão */}
-                              <span className="text-[10px] text-gray-300/70 absolute bottom-1 right-2 flex items-center gap-1">
+                              <span className={cn("text-[10px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-white/70" : "text-gray-500")}>
                                 {formatTime(message.created_at)}
-                                {isOwn && <span className="text-blue-400">✓✓</span>}
+                                {isOwn && <span className="text-white/90">✓✓</span>}
                               </span>
                             </div>
                           </div>
@@ -393,8 +393,7 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 rounded-lg p-3 space-y-2"
-              style={{ backgroundColor: '#1F1F1F' }}
+              className="flex-shrink-0 rounded-lg p-3 space-y-2 bg-gray-100"
             >
               {/* Preview attachments */}
               {(pendingImage || pendingAudioUrl) && (
@@ -473,15 +472,14 @@ const Community = () => {
                     }
                   }}
                   placeholder="Digite sua mensagem..."
-                  className="flex-1 h-10 text-sm bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
-                  style={{ backgroundColor: '#0A0A0A' }}
+                  className="flex-1 h-10 text-sm bg-white border-gray-300 text-gray-800 placeholder:text-gray-400"
                   autoFocus
                 />
                 
                 <Button 
                   type="submit"
                   disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
-                  className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="h-10 w-10 flex-shrink-0 rounded-full bg-orange-500 hover:bg-orange-600"
                 >
                   <Send className="w-4 h-4" />
                 </Button>

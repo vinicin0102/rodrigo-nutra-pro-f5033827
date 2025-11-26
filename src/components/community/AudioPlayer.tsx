@@ -131,7 +131,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
 
   return (
     <div className={`flex items-center gap-3 px-3 py-2 rounded-lg ${
-      isOwn ? "bg-primary/10" : "bg-muted"
+      isOwn ? "bg-orange-600/20" : "bg-gray-200"
     }`}>
       <audio 
         ref={audioRef} 
@@ -170,17 +170,24 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
             return (
               <div
                 key={i}
-                className={`flex-1 rounded-full transition-colors ${
-                  isPast ? "bg-primary" : "bg-muted-foreground/30"
-                }`}
-                style={{ height: `${height}%` }}
+                className={`flex-1 rounded-full transition-all ${
+                  isPast 
+                    ? isOwn ? "bg-white" : "bg-orange-500"
+                    : isOwn ? "bg-white/40" : "bg-gray-400/40"
+                } ${isPlaying && isPast ? "animate-waveform" : ""}`}
+                style={{ 
+                  height: `${height}%`,
+                  animationDelay: `${i * 30}ms`
+                }}
               />
             );
           })}
         </div>
 
         {/* Time Display */}
-        <div className="flex flex-col text-[10px] text-muted-foreground flex-shrink-0 leading-tight">
+        <div className={`flex flex-col text-[10px] flex-shrink-0 leading-tight ${
+          isOwn ? "text-white/70" : "text-gray-600"
+        }`}>
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>

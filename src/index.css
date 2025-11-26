@@ -143,3 +143,16 @@ All colors MUST be HSL.
     filter: brightness(1.3) drop-shadow(0 0 15px hsl(15, 90%, 55%));
   }
 }
+
+@keyframes waveform-pulse {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.6);
+  }
+}
+
+.animate-waveform {
+  animation: waveform-pulse 0.5s ease-in-out infinite;
+}
