@@ -293,7 +293,7 @@ const Community = () => {
     <div className="h-screen overflow-hidden flex flex-col md:pt-16 bg-white">
       <Navigation />
       
-      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-32 md:pb-8">
+      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6">
         <div className="max-w-4xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
           <div className="flex-1 flex flex-col min-w-0 min-h-0">
             <div className="text-center space-y-2 mb-6 flex-shrink-0">
@@ -306,104 +306,106 @@ const Community = () => {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#FAFAFA' }}>
-              <ScrollArea className="h-full overscroll-contain">
-                <div ref={scrollRef} className="p-4 space-y-3">
-                  {loading ? (
-                    <div className="text-center py-8 text-orange-500">
-                      Carregando mensagens...
-                    </div>
-                  ) : messages.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      Seja o primeiro a enviar uma mensagem! 👋
-                    </div>
-                  ) : (
-                    messages.map((message, idx) => {
-                      const isOwn = message.user_id === user?.id;
-                      const username = message.profiles?.username || 'Usuário';
-                      const initials = username.split(' ').map(n => n[0]).join('').toUpperCase();
-                      const userColor = getUserColor(message.user_id);
-                      
-                      const prevMessage = idx > 0 ? messages[idx - 1] : null;
-                      const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id;
+            <div className="flex-1 min-h-0 h-0 rounded-lg overflow-hidden mb-4 relative" style={{ backgroundColor: '#FAFAFA' }}>
+              <div className="absolute inset-0">
+                <ScrollArea className="h-full overscroll-contain">
+                  <div ref={scrollRef} className="p-4 space-y-3">
+                    {loading ? (
+                      <div className="text-center py-8 text-orange-500">
+                        Carregando mensagens...
+                      </div>
+                    ) : messages.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        Seja o primeiro a enviar uma mensagem! 👋
+                      </div>
+                    ) : (
+                      messages.map((message, idx) => {
+                        const isOwn = message.user_id === user?.id;
+                        const username = message.profiles?.username || 'Usuário';
+                        const initials = username.split(' ').map(n => n[0]).join('').toUpperCase();
+                        const userColor = getUserColor(message.user_id);
+                        
+                        const prevMessage = idx > 0 ? messages[idx - 1] : null;
+                        const showAvatar = !prevMessage || prevMessage.user_id !== message.user_id;
 
-                      return (
-                        <div
-                          key={message.id}
-                          className={cn(
-                            "flex gap-2 items-end mb-1",
-                            isOwn ? "justify-end" : "justify-start"
-                          )}
-                        >
-                          {/* Avatar apenas para mensagens de outros */}
-                          {!isOwn && (
-                            showAvatar ? (
-                              <Avatar className="w-8 h-8 flex-shrink-0 ring-2 ring-white/10">
-                                <AvatarImage src={message.profiles?.avatar_url || ''} />
-                                <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold text-xs">
-                                  {initials}
-                                </AvatarFallback>
-                              </Avatar>
-                            ) : (
-                              <div className="w-8 flex-shrink-0" />
-                            )
-                          )}
-                          
-                          <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
-                            {/* Nome apenas para mensagens de outros */}
-                            {!isOwn && showAvatar && (
-                              <span className="text-xs font-semibold mb-1 px-1 text-amber-600">
-                                {username}
-                              </span>
+                        return (
+                          <div
+                            key={message.id}
+                            className={cn(
+                              "flex gap-2 items-end mb-1",
+                              isOwn ? "justify-end" : "justify-start"
+                            )}
+                          >
+                            {/* Avatar apenas para mensagens de outros */}
+                            {!isOwn && (
+                              showAvatar ? (
+                                <Avatar className="w-8 h-8 flex-shrink-0 ring-2 ring-white/10">
+                                  <AvatarImage src={message.profiles?.avatar_url || ''} />
+                                  <AvatarFallback style={{ backgroundColor: userColor }} className="text-white font-semibold text-xs">
+                                    {initials}
+                                  </AvatarFallback>
+                                </Avatar>
+                              ) : (
+                                <div className="w-8 flex-shrink-0" />
+                              )
                             )}
                             
-                            {/* Balão da mensagem */}
-                            <div 
-                              className={cn(
-                                "rounded-lg px-3 py-2 max-w-[80%] md:max-w-md relative pb-5",
-                                isOwn ? "rounded-br-none" : "rounded-bl-none"
-                              )}
-                              style={{ 
-                                background: isOwn 
-                                  ? 'linear-gradient(135deg, #FB923C 0%, #F97316 100%)'
-                                  : '#F9FAFB'
-                              }}
-                            >
-                              {message.content && (
-                                <p className={cn("text-sm leading-relaxed break-words", isOwn ? "text-white" : "text-gray-700")}>
-                                  {message.content}
-                                </p>
-                              )}
-                              {message.image_url && (
-                                <img 
-                                  src={message.image_url} 
-                                  alt="Mensagem"
-                                  className="rounded-lg mt-2 max-w-full h-auto"
-                                />
-                              )}
-                              {message.audio_url && (
-                                <div className="mt-2">
-                                  <AudioPlayer 
-                                    audioUrl={message.audio_url} 
-                                    isOwn={isOwn}
-                                  />
-                                </div>
+                            <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
+                              {/* Nome apenas para mensagens de outros */}
+                              {!isOwn && showAvatar && (
+                                <span className="text-xs font-semibold mb-1 px-1 text-amber-600">
+                                  {username}
+                                </span>
                               )}
                               
-                              {/* Timestamp dentro do balão */}
-                              <span className={cn("text-[10px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-orange-100" : "text-gray-500")}>
-                                {formatTime(message.created_at)}
-                                {isOwn && <span className="text-white/90">✓✓</span>}
-                              </span>
+                              {/* Balão da mensagem */}
+                              <div 
+                                className={cn(
+                                  "rounded-lg px-3 py-2 max-w-[80%] md:max-w-md relative pb-5",
+                                  isOwn ? "rounded-br-none" : "rounded-bl-none"
+                                )}
+                                style={{ 
+                                  background: isOwn 
+                                    ? 'linear-gradient(135deg, #FB923C 0%, #F97316 100%)'
+                                    : '#F9FAFB'
+                                }}
+                              >
+                                {message.content && (
+                                  <p className={cn("text-sm leading-relaxed break-words", isOwn ? "text-white" : "text-gray-700")}>
+                                    {message.content}
+                                  </p>
+                                )}
+                                {message.image_url && (
+                                  <img 
+                                    src={message.image_url} 
+                                    alt="Mensagem"
+                                    className="rounded-lg mt-2 max-w-full h-auto"
+                                  />
+                                )}
+                                {message.audio_url && (
+                                  <div className="mt-2">
+                                    <AudioPlayer 
+                                      audioUrl={message.audio_url} 
+                                      isOwn={isOwn}
+                                    />
+                                  </div>
+                                )}
+                                
+                                {/* Timestamp dentro do balão */}
+                                <span className={cn("text-[10px] absolute bottom-1 right-2 flex items-center gap-1", isOwn ? "text-orange-100" : "text-gray-500")}>
+                                  {formatTime(message.created_at)}
+                                  {isOwn && <span className="text-white/90">✓✓</span>}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                  <div ref={bottomRef} />
-                </div>
-              </ScrollArea>
+                        );
+                      })
+                    )}
+                    <div ref={bottomRef} />
+                  </div>
+                </ScrollArea>
+              </div>
               <TypingIndicator />
             </div>
 
