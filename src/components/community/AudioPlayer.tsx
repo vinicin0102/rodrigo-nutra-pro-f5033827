@@ -97,7 +97,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
 
   // Gerar alturas do waveform apenas uma vez para evitar flickering (60 barras mais finas)
   const waveformBars = useMemo(() => 
-    Array.from({ length: 60 }, () => Math.random() * 60 + 40),
+    Array.from({ length: 35 }, () => Math.random() * 60 + 40),
     []
   );
 
@@ -173,7 +173,7 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
           
           {/* Barras do waveform mais finas */}
           {waveformBars.map((height, i) => {
-            const isPast = (i / 60) * 100 <= progress;
+            const isPast = (i / 35) * 100 <= progress;
             return (
               <div
                 key={i}

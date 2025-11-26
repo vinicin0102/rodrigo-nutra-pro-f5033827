@@ -290,23 +290,23 @@ const Community = () => {
   };
 
   return (
-    <div className="h-screen overflow-hidden flex flex-col md:pt-16 bg-white">
+    <div className="h-screen overflow-hidden flex flex-col pt-14 md:pt-16 bg-white">
       <Navigation />
       
-      <div className="flex-1 min-h-0 flex px-4 py-4 md:py-6 pb-32 md:pb-8">
+      <div className="flex-1 min-h-0 flex px-4 py-2 md:py-6 pb-20 md:pb-8">
         <div className="max-w-4xl mx-auto flex gap-4 flex-1 min-h-0 w-full">
           <div className="flex-1 flex flex-col min-w-0 min-h-0">
-            <div className="text-center space-y-2 mb-6 flex-shrink-0">
-              <h1 className="text-3xl md:text-4xl font-bold text-gradient-fire">
+            <div className="text-center space-y-1 mb-3 md:mb-6 flex-shrink-0">
+              <h1 className="text-xl md:text-4xl font-bold text-gradient-fire">
                 Comunidade Aberta
               </h1>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs md:text-sm hidden md:block">
                 Grupo de conversa da comunidade
               </p>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 min-h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#FAFAFA' }}>
+            <div className="flex-1 min-h-0 h-0 rounded-lg overflow-hidden mb-4" style={{ backgroundColor: '#FAFAFA' }}>
               <ScrollArea className="h-full overscroll-contain">
                 <div ref={scrollRef} className="p-4 space-y-3">
                   {loading ? (
@@ -360,7 +360,7 @@ const Community = () => {
                             {/* Balão da mensagem */}
                             <div 
                               className={cn(
-                                "rounded-lg px-2.5 py-1.5 max-w-[70%] md:max-w-sm relative pb-4",
+                                "rounded-lg px-2.5 py-1.5 max-w-[85%] md:max-w-sm relative pb-4",
                                 isOwn ? "rounded-br-none" : "rounded-bl-none"
                               )}
                               style={{ 
@@ -410,7 +410,7 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 rounded-lg p-3 space-y-2 bg-slate-50 border border-slate-200"
+              className="flex-shrink-0 rounded-lg p-2 md:p-3 space-y-2 bg-slate-50 border border-slate-200"
             >
               {/* Preview attachments */}
               {(pendingImage || pendingAudioUrl) && (
