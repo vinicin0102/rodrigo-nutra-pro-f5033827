@@ -393,7 +393,7 @@ const Community = () => {
             {/* Input Area */}
             <form 
               onSubmit={handleSendMessage}
-              className="flex-shrink-0 rounded-lg p-4 min-h-[120px] flex flex-col justify-end space-y-3"
+              className="flex-shrink-0 rounded-lg p-3 space-y-2"
               style={{ backgroundColor: '#1F1F1F' }}
             >
               {/* Preview attachments */}
@@ -444,8 +444,8 @@ const Community = () => {
                 </div>
               )}
 
-              {/* Botões de mídia */}
-              <div className="flex gap-2 mb-2">
+              {/* Botões de mídia + Input + Enviar (tudo inline) */}
+              <div className="flex gap-2 items-center">
                 <MediaUpload 
                   onImageSelected={setPendingImage}
                   disabled={!!pendingImage}
@@ -459,10 +459,7 @@ const Community = () => {
                 <EmojiPicker 
                   onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)}
                 />
-              </div>
-              
-              {/* Input + Enviar */}
-              <div className="flex gap-2 items-end">
+                
                 <Input
                   value={newMessage}
                   onChange={(e) => {
@@ -476,7 +473,7 @@ const Community = () => {
                     }
                   }}
                   placeholder="Digite sua mensagem..."
-                  className="flex-1 h-12 text-base bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
+                  className="flex-1 h-10 text-sm bg-black/50 border-gray-700 text-gray-100 placeholder:text-gray-500"
                   style={{ backgroundColor: '#0A0A0A' }}
                   autoFocus
                 />
@@ -484,9 +481,9 @@ const Community = () => {
                 <Button 
                   type="submit"
                   disabled={!newMessage.trim() && !pendingImage && !pendingAudio}
-                  className="h-12 w-12 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4" />
                 </Button>
               </div>
             </form>

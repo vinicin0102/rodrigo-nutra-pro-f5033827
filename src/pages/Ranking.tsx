@@ -32,7 +32,7 @@ const levelBadges = {
 
 const Ranking = () => {
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-8 md:pt-24">
+    <div className="min-h-screen bg-background pb-20 pt-20 md:pb-8 md:pt-24">
       <Navigation />
       
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
