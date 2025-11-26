@@ -109,7 +109,22 @@ export const AudioPlayer = ({ audioUrl, isOwn = false }: AudioPlayerProps) => {
       <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
         isOwn ? "bg-primary/10" : "bg-muted"
       }`}>
-        <span className="text-xs text-destructive">Erro ao carregar áudio</span>
+        <span className="text-xs text-destructive">Erro ao carregar</span>
+        <Button 
+          size="sm" 
+          variant="ghost"
+          className="h-7 px-2"
+          onClick={() => {
+            setError(false);
+            setLoading(true);
+            if (audioRef.current) {
+              audioRef.current.load();
+            }
+          }}
+        >
+          <Play className="h-3 w-3 mr-1" />
+          <span className="text-xs">Tentar novamente</span>
+        </Button>
       </div>
     );
   }
